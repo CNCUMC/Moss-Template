@@ -65,7 +65,8 @@
             "obj/**",
             "bin/**",
             "*.DotSettings",
-            "*.DotSettings.user"
+            "*.DotSettings.user",
+            "NewMod.ps1"
           ]
         }
       ]
