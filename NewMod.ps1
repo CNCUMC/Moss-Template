@@ -34,11 +34,11 @@
 
 .EXAMPLE
     .\NewMod.ps1
-    # 交互式输入所有参数，自动检测游戏路径
+    # Interactive input with auto-detected game path
 
 .NOTES
-    需要已安装 .NET SDK 并注册了 mosstemplate 模板。
-    注册命令: dotnet new install <模板项目路径>
+    Requires .NET SDK and the mosstemplate template to be installed.
+    Install: dotnet new install <Moss-Template project path>
 #>
 param(
     [string]$ModName,
@@ -51,11 +51,10 @@ param(
 )
 
 # ============================================================
-# 辅助函数
+# Helper functions
 # ============================================================
 
 function Convert-ToDisplayName {
-    <# 从 PascalCase 命名空间自动生成带空格的显示名称 #>
     param([string]$Name)
     if ([string]::IsNullOrWhiteSpace($Name)) { return $Name }
     $result = [System.Text.StringBuilder]::new()
@@ -71,53 +70,38 @@ function Convert-ToDisplayName {
 }
 
 function Read-Input {
-    <# 读取用户输入，支持默认值 #>
     param(
         [string]$Prompt,
         [string]$DefaultValue,
         [switch]$Required
     )
     if ($DefaultValue) {
-        $input = Read-Host "$Prompt (默认: $DefaultValue)"
-        if ([string]::IsNullOrWhiteSpace($input)) { return $DefaultValue }
+        $userInput = Read-Host "$Prompt (default: $DefaultValue)"
+        if ([string]::IsNullOrWhiteSpace($userInput)) { return $DefaultValue }
     } else {
-        $input = Read-Host $Prompt
+        $userInput = Read-Host $Prompt
     }
-    if ($Required -and [string]::IsNullOrWhiteSpace($input)) {
-        Write-Error "此项为必填项，请重新运行脚本并提供有效值。"
+    if ($Required -and [string]::IsNullOrWhiteSpace($userInput)) {
+        Write-Error "This field is required."
         exit 1
     }
-    return $input
+    return $userInput
 }
 
 function Find-GameManagedDir {
-    <#
-    .SYNOPSIS
-        自动搜索 Casualties Unknown 游戏的 Managed 目录。
-    .DESCRIPTION
-        按优先级搜索以下位置：
-        1. Steam 默认安装路径 (C:/Program Files (x86)/Steam)
-        2. Steam 常见库路径 (D:/SteamLibrary, E:/SteamLibrary 等)
-        3. 所有 Steam 库路径 (通过 libraryfolders.vdf 解析)
-    #>
     $gameRelativePath = "steamapps\common\Casualties Unknown Demo\CasualtiesUnknown_Data\Managed"
 
-    # 候选 Steam 根目录列表
     $steamCandidates = @(
-        # Windows 默认 Steam 安装路径
         "C:\Program Files (x86)\Steam",
-        # 常见的自定义 Steam 库路径
         "D:\SteamLibrary",
         "E:\SteamLibrary",
         "F:\SteamLibrary",
         "D:\Steam",
         "E:\Steam",
-        "F:\Steam",
-        # 用户桌面
-        "$env:USERPROFILE\Desktop"
+        "F:\Steam"
     )
 
-    # 从注册表读取 Steam 安装路径
+    # Read Steam install path from registry
     try {
         $steamRegPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam" -Name "InstallPath" -ErrorAction SilentlyContinue
         if ($steamRegPath -and $steamRegPath.InstallPath) {
@@ -125,14 +109,13 @@ function Find-GameManagedDir {
         }
     } catch { }
 
-    # 尝试从 Steam 的 libraryfolders.vdf 解析所有库路径
+    # Parse libraryfolders.vdf for additional Steam library paths
     $libraryFolders = @()
     foreach ($steamRoot in $steamCandidates) {
         $vdfPath = Join-Path $steamRoot "steamapps\libraryfolders.vdf"
         if (Test-Path $vdfPath) {
             try {
                 $vdfContent = Get-Content $vdfPath -Raw
-                # 解析 "path" "xxx" 格式的行
                 $pattern = '"path"\s+"(.+?)"'
                 $vdfMatches = [regex]::Matches($vdfContent, $pattern)
                 foreach ($m in $vdfMatches) {
@@ -145,7 +128,7 @@ function Find-GameManagedDir {
         }
     }
 
-    # 合并所有候选路径（库路径优先）
+    # Build candidate paths (library folders first, then static candidates)
     $allCandidates = @()
     foreach ($lib in $libraryFolders) {
         $allCandidates += Join-Path $lib $gameRelativePath
@@ -154,7 +137,7 @@ function Find-GameManagedDir {
         $allCandidates += Join-Path $steamRoot $gameRelativePath
     }
 
-    # 搜索并返回第一个存在的路径
+    # Return first existing path
     foreach ($candidate in $allCandidates) {
         $normalizedPath = $candidate.Replace('\', '/')
         if (Test-Path $normalizedPath -PathType Container) {
@@ -166,7 +149,7 @@ function Find-GameManagedDir {
 }
 
 # ============================================================
-# 设置编码
+# Setup encoding
 # ============================================================
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
@@ -174,108 +157,108 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 > $null
 
 # ============================================================
-# 交互式输入缺失的参数
+# Interactive input for missing parameters
 # ============================================================
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Casualties Unknown Mod Creator" -ForegroundColor Cyan
-Write-Host "  Moss-Template 模组创建向导" -ForegroundColor Cyan
+Write-Host "  Moss-Template Mod Creation Wizard" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ModName - 必填
+# ModName - required
 if ([string]::IsNullOrWhiteSpace($ModName)) {
-    $ModName = Read-Input -Prompt "输入模组命名空间 (PascalCase, 不能有空格, 如 MyCoolMod)" -Required
+    $ModName = Read-Input -Prompt "Enter mod namespace (PascalCase, no spaces, e.g. MyCoolMod)" -Required
 }
 
-# 验证命名空间格式（不能有空格，必须是合法的 C# 标识符）
+# Validate namespace (no spaces)
 if ($ModName -match '\s') {
-    Write-Error "命名空间不能包含空格: '$ModName'"
+    Write-Error "Namespace cannot contain spaces: '$ModName'"
     exit 1
 }
 
-# ModDisplayName - 可选，默认从 ModName 自动生成
+# ModDisplayName - optional, auto-generated from ModName
 if ([string]::IsNullOrWhiteSpace($ModDisplayName)) {
     $autoDisplayName = Convert-ToDisplayName -Name $ModName
-    $ModDisplayName = Read-Input -Prompt "输入模组显示名称" -DefaultValue $autoDisplayName
+    $ModDisplayName = Read-Input -Prompt "Enter mod display name" -DefaultValue $autoDisplayName
 }
 
-# ModGuid - 必填
+# ModGuid - required
 if ([string]::IsNullOrWhiteSpace($ModGuid)) {
     $defaultGuid = "com.example.$($ModName.ToLower())"
-    $ModGuid = Read-Input -Prompt "输入模组 GUID (格式: yourname.modname)" -DefaultValue $defaultGuid -Required
+    $ModGuid = Read-Input -Prompt "Enter mod GUID (format: yourname.modname)" -DefaultValue $defaultGuid -Required
 }
 
-# ModVersion - 可选
+# ModVersion - optional
 if ([string]::IsNullOrWhiteSpace($ModVersion)) {
-    $ModVersion = Read-Input -Prompt "输入模组版本号" -DefaultValue "1.0.0"
+    $ModVersion = Read-Input -Prompt "Enter mod version" -DefaultValue "1.0.0"
 }
 
-# AuthorName - 可选
+# AuthorName - optional
 if ([string]::IsNullOrWhiteSpace($AuthorName)) {
-    $AuthorName = Read-Input -Prompt "输入作者名称 (用于 LICENSE)" -DefaultValue "Your Name"
+    $AuthorName = Read-Input -Prompt "Enter author name (for LICENSE)" -DefaultValue "Your Name"
 }
 
-# GameManagedDir - 自动检测
+# GameManagedDir - auto-detect
 if ([string]::IsNullOrWhiteSpace($GameManagedDir)) {
     Write-Host ""
-    Write-Host "正在搜索 Casualties Unknown 游戏路径..." -ForegroundColor Cyan
+    Write-Host "Searching for Casualties Unknown game directory..." -ForegroundColor Cyan
 
     $detectedPath = Find-GameManagedDir
 
     if ($detectedPath) {
-        Write-Host "  已找到游戏目录: $detectedPath" -ForegroundColor Green
-        $GameManagedDir = Read-Input -Prompt "输入游戏 Managed 目录路径" -DefaultValue $detectedPath
+        Write-Host "  Found: $detectedPath" -ForegroundColor Green
+        $GameManagedDir = Read-Input -Prompt "Enter game Managed directory path" -DefaultValue $detectedPath
     } else {
-        Write-Host "  未自动找到游戏目录，请手动输入。" -ForegroundColor Yellow
-        $GameManagedDir = Read-Input -Prompt "输入游戏 Managed 目录路径 (如 E:/SteamLibrary/steamapps/common/Casualties Unknown Demo/CasualtiesUnknown_Data/Managed)" -Required
+        Write-Host "  Game directory not found automatically." -ForegroundColor Yellow
+        $GameManagedDir = Read-Input -Prompt "Enter game Managed directory path" -Required
     }
 }
 
-# 验证游戏路径
+# Validate game path
 $normalizedGameDir = $GameManagedDir.Replace('\', '/')
 if (-not (Test-Path $normalizedGameDir -PathType Container)) {
-    Write-Warning "游戏目录不存在: $GameManagedDir"
-    Write-Warning "项目将被创建，但你需要手动修改 csproj 中的 DLL 引用路径。"
+    Write-Warning "Game directory does not exist: $GameManagedDir"
+    Write-Warning "Project will be created, but you need to manually fix DLL reference paths in csproj."
 }
 
-# OutputDir - 可选
+# OutputDir - optional
 if ([string]::IsNullOrWhiteSpace($OutputDir)) {
-    $OutputDir = Read-Input -Prompt "输入项目输出目录" -DefaultValue $ModName
+    $OutputDir = Read-Input -Prompt "Enter project output directory" -DefaultValue $ModName
 }
 
 # ============================================================
-# 显示配置摘要
+# Show config summary
 # ============================================================
 
 Write-Host ""
 Write-Host "----------------------------------------" -ForegroundColor Yellow
-Write-Host "配置摘要:" -ForegroundColor Yellow
-Write-Host "  命名空间/项目名: $ModName" -ForegroundColor White
-Write-Host "  显示名称:        $ModDisplayName" -ForegroundColor White
-Write-Host "  GUID:            $ModGuid" -ForegroundColor White
-Write-Host "  版本号:          $ModVersion" -ForegroundColor White
-Write-Host "  作者:            $AuthorName" -ForegroundColor White
-Write-Host "  游戏目录:        $GameManagedDir" -ForegroundColor White
-Write-Host "  输出目录:        $OutputDir" -ForegroundColor White
+Write-Host "Configuration Summary:" -ForegroundColor Yellow
+Write-Host "  Namespace/Project: $ModName" -ForegroundColor White
+Write-Host "  Display Name:      $ModDisplayName" -ForegroundColor White
+Write-Host "  GUID:              $ModGuid" -ForegroundColor White
+Write-Host "  Version:           $ModVersion" -ForegroundColor White
+Write-Host "  Author:            $AuthorName" -ForegroundColor White
+Write-Host "  Game Directory:    $GameManagedDir" -ForegroundColor White
+Write-Host "  Output Directory:  $OutputDir" -ForegroundColor White
 Write-Host "----------------------------------------" -ForegroundColor Yellow
 Write-Host ""
 
-$confirm = Read-Host "确认创建? (Y/n)"
+$confirm = Read-Host "Proceed? (Y/n)"
 if ($confirm -eq 'n' -or $confirm -eq 'N') {
-    Write-Host "已取消。" -ForegroundColor Red
+    Write-Host "Cancelled." -ForegroundColor Red
     exit 0
 }
 
 # ============================================================
-# 执行 dotnet new
+# Execute dotnet new
 # ============================================================
 
 Write-Host ""
-Write-Host "正在创建项目..." -ForegroundColor Cyan
+Write-Host "Creating project..." -ForegroundColor Cyan
 
-# 将路径中的反斜杠替换为正斜杠（csproj 要求正斜杠）
+# Normalize path separators for csproj
 $GameManagedDirNormalized = $GameManagedDir.Replace('\', '/')
 
 $dotnetArgs = @(
@@ -289,56 +272,56 @@ $dotnetArgs = @(
     "-o", $OutputDir
 )
 
-Write-Host "  执行: dotnet $($dotnetArgs -join ' ')" -ForegroundColor DarkGray
+Write-Host "  Running: dotnet $($dotnetArgs -join ' ')" -ForegroundColor DarkGray
 Write-Host ""
 
 & dotnet @dotnetArgs
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "dotnet new 执行失败 (退出码: $LASTEXITCODE)"
+    Write-Error "dotnet new failed (exit code: $LASTEXITCODE)"
     Write-Host ""
-    Write-Host "如果 mosstemplate 模板未安装，请先执行以下命令注册:" -ForegroundColor Yellow
-    Write-Host "  dotnet new install <Moss-Template项目路径>" -ForegroundColor Yellow
+    Write-Host "If mosstemplate is not installed, run:" -ForegroundColor Yellow
+    Write-Host "  dotnet new install <Moss-Template project path>" -ForegroundColor Yellow
     exit $LASTEXITCODE
 }
 
 # ============================================================
-# 清理模板 Git 并初始化新仓库
+# Clean template git and init new repo
 # ============================================================
 
 $projectPath = Resolve-Path $OutputDir
 
-# 删除从模板继承的 .git 目录（如果存在）
+# Remove template .git directory if present
 $oldGitDir = Join-Path $projectPath ".git"
 if (Test-Path $oldGitDir) {
-    Write-Host "清理模板 Git 仓库..." -ForegroundColor Cyan
+    Write-Host "Cleaning template git repository..." -ForegroundColor Cyan
     Remove-Item -Recurse -Force $oldGitDir
 }
 
-# 初始化新的 Git 仓库
-Write-Host "初始化新 Git 仓库..." -ForegroundColor Cyan
+# Initialize new git repository
+Write-Host "Initializing new git repository..." -ForegroundColor Cyan
 Push-Location $projectPath
 try {
     git init | Out-Null
     git add . | Out-Null
     git commit -m "Initial commit: $ModDisplayName mod" | Out-Null
-    Write-Host "  Git 仓库已初始化并完成首次提交。" -ForegroundColor Green
+    Write-Host "  Git repository initialized with first commit." -ForegroundColor Green
 } catch {
-    Write-Warning "Git 初始化失败: $_"
+    Write-Warning "Git init failed: $_"
 }
 Pop-Location
 
 # ============================================================
-# 完成
+# Done
 # ============================================================
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  项目创建成功!" -ForegroundColor Green
+Write-Host "  Project created successfully!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "下一步:" -ForegroundColor Yellow
+Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. cd $OutputDir" -ForegroundColor White
-Write-Host "  2. dotnet build  (验证编译)" -ForegroundColor White
-Write-Host "  3. 右键 StartGame.ps1 运行测试" -ForegroundColor White
+Write-Host "  2. dotnet build  (verify compilation)" -ForegroundColor White
+Write-Host "  3. Right-click StartGame.ps1 to run" -ForegroundColor White
 Write-Host ""
