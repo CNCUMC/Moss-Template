@@ -312,6 +312,38 @@ try {
 Pop-Location
 
 # ============================================================
+# Generate Rider run configuration
+# ============================================================
+
+Write-Host "Generating Rider run configuration..." -ForegroundColor Cyan
+
+# Derive game root path from Managed directory (go up two levels)
+$gameRootPath = (Resolve-Path (Join-Path $normalizedGameDir "..\..")).Path
+$gameRootPath = $gameRootPath.Replace('\', '/')
+
+# Create .run directory
+$runDir = Join-Path $projectPath ".run"
+if (-not (Test-Path $runDir)) {
+    New-Item -ItemType Directory -Path $runDir -Force | Out-Null
+}
+
+# Generate StartGame.run.xml
+$runConfig = @"
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="StartGame" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="`$PROJECT_DIR$/StartGame.ps1" scriptParameters=""$gameRootPath" "$ModName"" commandOptions="-ExecutionPolicy Bypass" executablePath="C:/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe">
+    <envs />
+    <method v="2">
+      <option name="Build Solution" enabled="true" />
+    </method>
+  </configuration>
+</component>
+"@
+
+$runConfigPath = Join-Path $runDir "StartGame.run.xml"
+[System.IO.File]::WriteAllText($runConfigPath, $runConfig, [System.Text.UTF8Encoding]::new($true))
+Write-Host "  Created: .run/StartGame.run.xml" -ForegroundColor Green
+
+# ============================================================
 # Done
 # ============================================================
 
