@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Black-Moss",
+  "classifications": [
+    "CUMod",
+    "BepInEx",
+    "Mod"
+  ],
+  "identity": "BlackMoss.MossTemplate",
+  "name": "Casualties Unknown Mod Template",
+  "description": "A template for developing BepInEx mods for Casualties Unknown.",
+  "shortName": "mosstemplate",
+  "sourceName": "MossTemplate",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "ModDisplayName": {
+      "type": "parameter",
+      "description": "The display name of your mod (e.g. 'My Cool Mod')",
+      "replaces": "Moss Template",
+      "defaultValue": "My Mod"
+    },
+    "ModGuid": {
+      "type": "parameter",
+      "description": "The unique GUID for your mod (e.g. 'com.example.mymod')",
+      "replaces": "org.explosivehydra.mosstemplate",
+      "defaultValue": "com.example.mymod"
+    },
+    "ModVersion": {
+      "type": "parameter",
+      "description": "The initial version of your mod",
+      "replaces": "1.0.0",
+      "defaultValue": "1.0.0"
+    },
+    "AuthorName": {
+      "type": "parameter",
+      "description": "The author name for LICENSE and project metadata",
+      "replaces": "Black-Moss",
+      "defaultValue": "Your Name"
+    },
+    "Description": {
+      "type": "parameter",
+      "description": "A short description of your mod",
+      "replaces": "A mod for Casualties Unknown.",
+      "defaultValue": "A mod for Casualties Unknown."
+    },
+    "GameManagedDir": {
+      "type": "parameter",
+      "description": "Path to the game's Managed directory (e.g. 'E:/SteamLibrary/steamapps/common/Casualties Unknown Demo/CasualtiesUnknown_Data/Managed')",
+      "replaces": "__GAME_MANAGED_DIR__",
+      "defaultValue": "C:/Program Files (x86)/Steam/steamapps/common/Casualties Unknown Demo/CasualtiesUnknown_Data/Managed"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            ".template.config/**",
+            ".run/**",
+            "obj/**",
+            "bin/**",
+            "*.DotSettings.user"
+          ]
+        }
+      ]
+    }
+  ]
+}
