@@ -247,6 +247,10 @@ Write-Host "正在创建项目..." -ForegroundColor Cyan
 
 $GameManagedDirNormalized = $GameManagedDir.Replace('\', '/')
 
+# 推导游戏根路径（向上两级目录）
+$gameRootDir = (Resolve-Path (Join-Path $normalizedGameDir "..\..")).Path
+$GameRootPath = $gameRootDir.Replace('\', '/')
+
 $dotnetArgs = @(
     "new", "mosstemplate",
     "-n", $ModName,
@@ -255,6 +259,8 @@ $dotnetArgs = @(
     "--ModVersion", $ModVersion,
     "--AuthorName", $AuthorName,
     "--GameManagedDir", $GameManagedDirNormalized,
+    "--GameRootPath", $GameRootPath,
+    "--ModNamespace", $ModName,
     "-o", $OutputDir
 )
 

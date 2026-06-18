@@ -1,6 +1,6 @@
-﻿param(
-    [string]$GamePath,
-    [string]$ModNamespace
+param(
+    [string]$GamePath = "__GAME_ROOT_PATH__",
+    [string]$ModNamespace = "__MOD_NAMESPACE__"
 )
 
 # 自动从命名空间生成显示名称（仅在大写字母前加空格，前提是该大写字母前面是小写字母）
