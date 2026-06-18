@@ -317,7 +317,7 @@ if (-not (Test-Path $runDir)) {
 
 $runConfig = @"
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="StartGame" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="`$PROJECT_DIR$/StartGame.ps1" scriptParameters=""$gameRootPath" "$ModName"" commandOptions="-ExecutionPolicy Bypass" executablePath="C:/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe">
+  <configuration default="false" name="StartGame" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="`$PROJECT_DIR$/StartGame.ps1" executablePath="C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe">
     <envs />
     <method v="2">
       <option name="Build Solution" enabled="true" />
