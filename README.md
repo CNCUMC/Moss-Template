@@ -113,6 +113,45 @@ dotnet new mosstemplate -n MyCoolMod `
 
 ---
 
+## 发布模组 (Release.ps1)
+
+[Release.ps1](Release.ps1) 用于构建、打包并发布模组到 NexusMods 和 GitHub Release。
+
+**基本用法：**
+```powershell
+.\Release.ps1                          # 交互式确认版本号后发布
+.\Release.ps1 -SkipNexus               # 只发 GitHub
+.\Release.ps1 -SkipBuild -SkipGitHub   # 只发 NexusMods（跳过构建）
+```
+
+### NexusMods API Key 设置
+
+1. 登录 [NexusMods](https://www.nexusmods.com/)
+2. 进入 [API Access](https://www.nexusmods.com/casualtiesunknown/users/myaccount?tab=api) 页面
+3. 点击 `REQUEST API KEY` 获取 Key
+
+**使用方式：**
+```powershell
+# 环境变量（推荐，一次设置永久有效）
+$env:NEXUS_API_KEY = "你的API Key"
+.\Release.ps1
+
+# 或命令行参数
+.\Release.ps1 -NexusApiKey "你的API Key"
+```
+
+### GitHub 认证
+
+```powershell
+# 安装 GitHub CLI
+winget install GitHub.cli
+
+# 登录
+gh auth login
+```
+
+---
+
 ## csproj 引用说明
 
 模板包含 15 个核心游戏 DLL 引用。如需额外引用（如动画、音频、粒子等），在 csproj 中取消注释或添加新条目：
