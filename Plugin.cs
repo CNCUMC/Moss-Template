@@ -9,7 +9,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string Guid = "org.cncumc.mosstemplate";
     public const string Name = "Moss Template";
-    public const string Version = "1.1.0";
+    public const string Version = "1.0.0";
     internal new static ManualLogSource Logger;
     private readonly Harmony _harmony = new(Guid);
 
