@@ -37,7 +37,7 @@ $ModDll = [System.IO.Path]::Combine($PSScriptRoot, "bin/Debug/net472", "$ModName
 
 $targetModFolder = $ModName
 
-$docFiles = @("README.md", "README_ZH.md", "LICENSE.md", "CHANGELOG.md", "CHANGELOG_ZH.md", "Cover.png")
+$docFiles = @("README.md", "README_ZH.md", "LICENSE.md", "CHANGELOG.md", "CHANGELOG_ZH.md")
 
 $logDestination = [System.IO.Path]::Combine($PSScriptRoot, "Logs", "$timestamp.log")
 
