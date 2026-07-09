@@ -154,13 +154,21 @@ gh auth login
 
 ## csproj 引用说明
 
-模板包含 15 个核心游戏 DLL 引用。如需额外引用（如动画、音频、粒子等），在 csproj 中取消注释或添加新条目：
+模板包含 15 个核心游戏 DLL 引用。所有路径通过 `Directory.Build.props` 中的 MSBuild 属性管理：
+
+| 属性 | 说明 | 示例 |
+|------|------|------|
+| `$(GameDir)` | 游戏根目录 | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
+| `$(ManagedDir)` | Managed 目录 | `$(GameDir)/CasualtiesUnknown_Data/Managed` |
+| `$(CUCoreLibDll)` | CUCoreLib 路径（可选） | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll` |
+
+如需额外引用（如动画、音频、粒子等），在 csproj 中取消注释或添加新条目：
 
 ```xml
 <!-- 例如：添加音频模块 -->
 <Reference Include="UnityEngine.AudioModule">
-    <HintPath>__GAME_MANAGED_DIR__/UnityEngine.AudioModule.dll</HintPath>
+    <HintPath>$(ManagedDir)/UnityEngine.AudioModule.dll</HintPath>
 </Reference>
 ```
 
-将 `__GAME_MANAGED_DIR__` 替换为你的游戏 Managed 目录实际路径。
+> **注意：** 首次使用时复制 `Directory.Build.props.example` 为 `Directory.Build.props` 并填写你的游戏路径。

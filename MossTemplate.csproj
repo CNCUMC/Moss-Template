@@ -1,109 +1,111 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-    <Product>MossTemplate</Product>
-    <Version>1.0.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <RestoreAdditionalProjectSources>
-      https://api.nuget.org/v3/index.json;
-      https://nuget.bepinex.dev/v3/index.json;
-      https://nuget.samboy.dev/v3/index.json
-    </RestoreAdditionalProjectSources>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageProjectUrl>https://github.com/yourname/MossTemplate</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/yourname/MossTemplate</RepositoryUrl>
-    <PackageId>MossTemplate</PackageId>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <Product>MossTemplate</Product>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json;
+            https://nuget.samboy.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <Platforms>AnyCPU;x64;x86</Platforms>
+        <PackageProjectUrl>https://github.com/yourname/MossTemplate</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/yourname/MossTemplate</RepositoryUrl>
+        <PackageId>MossTemplate</PackageId>
+    </PropertyGroup>
 
-  <!-- BepInEx & Harmony (通过 NuGet 自动管理) -->
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" IncludeAssets="compile" />
-  </ItemGroup>
-
-  <!--
-    游戏 DLL 引用 - 路径由 Directory.Build.props 中的 $(BaseGamePath) 决定。
-    复制 Directory.Build.props.example 为 Directory.Build.props 并填写你的游戏路径。
-    如需额外引用，取消注释或添加新条目。
-  -->
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.InputModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(BaseGamePath)\CasualtiesUnknown_Data\Managed\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference
-      Include="Microsoft.NETFramework.ReferenceAssemblies"
-      Version="1.0.2"
-      PrivateAssets="all"
-    />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <RequiredFilesToCopy>
-      $(AssemblyName).dll;
-    </RequiredFilesToCopy>
-    <RequiredFoldersToCopy>
-    </RequiredFoldersToCopy>
-  </PropertyGroup>
-
-  <Target Name="CopyOutputDllsToPluginsFolder" AfterTargets="AfterBuild" Condition="'$(RequiredFilesToCopy)'!=''">
-    <MakeDir Directories="$(BepInExDir)/plugins/$(PluginDirName)" />
-    <CombinePath BasePath="$(OutDir)" Paths="$(RequiredFilesToCopy)">
-      <Output TaskParameter="CombinedPaths" ItemName="RequiredFilesToCopy_Combined" />
-    </CombinePath>
-    <Copy
-      SourceFiles="@(RequiredFilesToCopy_Combined)"
-      DestinationFolder="$(BepInExDir)/plugins/$(PluginDirName)"
-    />
-  </Target>
-
-  <Target Name="CopyFoldersToPluginsFolder" AfterTargets="AfterBuild" Condition="'$(RequiredFoldersToCopy)'!=''">
     <ItemGroup>
-      <RequiredFolders Include="$(RequiredFoldersToCopy.Split(';'))" />
-      <FilesToCopy Include="%(RequiredFolders.Identity)/**/*" />
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+        <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" IncludeAssets="compile"/>
     </ItemGroup>
-    <Copy
-      SourceFiles="@(FilesToCopy)"
-      DestinationFiles="@(FilesToCopy->'$(BepInExDir)/plugins/$(PluginDirName)/%(Identity)')"
-    />
-  </Target>
+
+    <!-- CUCoreLib (CCL) -->
+<!--    <ItemGroup>-->
+<!--        <Reference Include="CUCoreLib">-->
+<!--            <HintPath>$(CUCoreLibDll)</HintPath>-->
+<!--        </Reference>-->
+<!--    </ItemGroup>-->
+
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(ManagedDir)/Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>$(ManagedDir)/UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.GridModule">
+            <HintPath>$(ManagedDir)/UnityEngine.GridModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputModule">
+            <HintPath>$(ManagedDir)/UnityEngine.InputModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(ManagedDir)/UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UnityWebRequestModule">
+            <HintPath>$(ManagedDir)/UnityEngine.UnityWebRequestModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>$(ManagedDir)/UnityEngine.PhysicsModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.TilemapModule">
+            <HintPath>$(ManagedDir)/UnityEngine.TilemapModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>$(ManagedDir)/UnityEngine.UIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(ManagedDir)/UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>$(ManagedDir)/UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+            <HintPath>$(ManagedDir)/UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.RenderPipelines.Core.Runtime">
+            <HintPath>$(ManagedDir)/Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.RenderPipelines.Universal.Runtime">
+            <HintPath>$(ManagedDir)/Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(ManagedDir)/Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference
+                Include="Microsoft.NETFramework.ReferenceAssemblies"
+                Version="1.0.2"
+                PrivateAssets="all"
+        />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <RequiredFilesToCopy>
+            $(AssemblyName).dll;
+        </RequiredFilesToCopy>
+        <RequiredFoldersToCopy>
+        </RequiredFoldersToCopy>
+    </PropertyGroup>
+
+    <Target Name="CopyOutputDllsToPluginsFolder" AfterTargets="AfterBuild" Condition="'$(RequiredFilesToCopy)'!=''">
+        <MakeDir Directories="$(BepInExDir)/plugins/$(PluginDirName)"/>
+        <CombinePath BasePath="$(OutDir)" Paths="$(RequiredFilesToCopy)">
+            <Output TaskParameter="CombinedPaths" ItemName="RequiredFilesToCopy_Combined"/>
+        </CombinePath>
+        <Copy
+                SourceFiles="@(RequiredFilesToCopy_Combined)"
+                DestinationFolder="$(BepInExDir)/plugins/$(PluginDirName)"
+        />
+    </Target>
 </Project>
