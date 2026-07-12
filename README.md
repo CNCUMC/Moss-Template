@@ -47,10 +47,11 @@ dotnet build
 ```powershell
 dotnet new mosstemplate -n MyCoolMod `
     --ModDisplayName "My Cool Mod" `
-    --ModGuid "com.example.mycoolmod" `
+    --ModGuid "com.example.mymod" `
     --ModVersion "1.0.0" `
     --AuthorName "Your Name" `
-    --GameManagedDir "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo/CasualtiesUnknown_Data/Managed"
+    --GameRootPath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" `
+    --Language "zh-CN"
 ```
 
 ### 方式三：从 GitHub 克隆（传统方式）
@@ -70,7 +71,8 @@ dotnet new mosstemplate -n MyCoolMod `
 | `--ModGuid`        | 模组唯一标识（格式 `yourname.modname`）  | `com.example.mymod` |
 | `--ModVersion`     | 初始版本号                          | `1.0.0`             |
 | `--AuthorName`     | 作者名称（用于 LICENSE）               | `Your Name`         |
-| `--GameManagedDir` | 游戏 Managed 目录路径                | Steam 默认路径          |
+| `--GameRootPath`   | 游戏根目录路径                      | Steam 默认路径          |
+| `--Language`       | 生成文件的语言 (`zh-CN` 或 `en-US`) | `zh-CN`             |
 
 模板会自动替换以下内容：
 

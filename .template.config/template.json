@@ -58,11 +58,35 @@
       "description": "Mod namespace for StartGame.ps1 default parameter (same as project name)",
       "replaces": "__MOD_NAMESPACE__",
       "defaultValue": "MyMod"
+    },
+    "Language": {
+      "type": "parameter",
+      "description": "Language for generated project files (zh-CN or en-US)",
+      "replaces": "__LANGUAGE__",
+      "defaultValue": "zh-CN"
     }
   },
   "sources": [
     {
       "modifiers": [
+        {
+          "condition": "('__LANGUAGE__' == 'zh-CN')",
+          "include": [
+            "README.md",
+            "CHANGELOG.md"
+          ]
+        },
+        {
+          "condition": "('__LANGUAGE__' == 'en-US')",
+          "include": [
+            "README.en.md",
+            "CHANGELOG.en.md"
+          ],
+          "rename": {
+            "README.en.md": "README.md",
+            "CHANGELOG.en.md": "CHANGELOG.md"
+          }
+        },
         {
           "exclude": [
             ".template.config/**",
@@ -72,7 +96,9 @@
             "bin/**",
             "*.DotSettings",
             "*.DotSettings.user",
-            "NewMod.ps1"
+            "NewMod.ps1",
+            "README.en.md",
+            "CHANGELOG.en.md"
           ]
         }
       ]
