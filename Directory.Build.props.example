@@ -3,6 +3,6 @@
     <PropertyGroup>
         <GameDir>__GAME_ROOT_PATH__</GameDir>
         <ManagedDir>$(GameDir)/CasualtiesUnknown_Data/Managed</ManagedDir>
-<!--        <CUCoreLibDll>$(GameDir)/BepInEx/plugins/CUCoreLib.dll</CUCoreLibDll>-->
+        <CUCoreLibDll>$(GameDir)/BepInEx/plugins/CUCoreLib.dll</CUCoreLibDll>
     </PropertyGroup>
 </Project>

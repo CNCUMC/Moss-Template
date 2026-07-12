@@ -25,11 +25,11 @@
     </ItemGroup>
 
     <!-- CUCoreLib (CCL) -->
-<!--    <ItemGroup>-->
-<!--        <Reference Include="CUCoreLib">-->
-<!--            <HintPath>$(CUCoreLibDll)</HintPath>-->
-<!--        </Reference>-->
-<!--    </ItemGroup>-->
+    <ItemGroup>
+        <Reference Include="CUCoreLib">
+            <HintPath>$(CUCoreLibDll)</HintPath>
+        </Reference>
+    </ItemGroup>
 
     <ItemGroup>
         <Reference Include="Assembly-CSharp">
