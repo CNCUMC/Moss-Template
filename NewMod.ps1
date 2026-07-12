@@ -5,6 +5,7 @@
 .DESCRIPTION
     使用 dotnet new mosstemplate 模板生成新模组项目，并自动配置所有参数。
     自动检测 Steam 安装路径中的游戏目录。
+    运行前会自动从当前目录安装模板，无需手动执行 dotnet new install。
 
 .PARAMETER ModName
     模组的 PascalCase 命名空间名称（如 "MyCoolMod"），将作为项目名和命名空间。
@@ -33,15 +34,14 @@
     项目输出目录。如果不指定，则使用当前目录下与 ModName 同名的子目录。
 
 .EXAMPLE
-    .\NewMod.ps1 -ModName "MyCoolMod" -ModGuid "com.example.mymod"
+    .\NewMod.ps1 -ModName "MyCoolMod" -ModGuid "com.example.mycoolmod"
 
 .EXAMPLE
     .\NewMod.ps1 -Language en-US
     # Interactive input in English
 
 .NOTES
-    需要已安装 .NET SDK 并注册了 mosstemplate 模板。
-    注册命令: dotnet new install <模板项目路径>
+    需要已安装 .NET SDK。模板会自动从当前目录安装，无需手动执行 dotnet new install。
 #>
 param(
     [string]$ModName,
@@ -116,6 +116,9 @@ $Strings = @{
         DefaultVersion    = "1.0.0"
         DefaultGUIDPrefix = "com.example."
         DefaultOutput     = ""
+        InstallingTemplate = "正在安装模板..."
+        TemplateInstalled  = "模板安装完成。"
+        TemplateInstallFail = "模板安装失败。"
     }
     en-US = @{
         Title             = "Casualties Unknown Mod Creator"
@@ -173,6 +176,9 @@ $Strings = @{
         DefaultVersion    = "1.0.0"
         DefaultGUIDPrefix = "com.example."
         DefaultOutput     = ""
+        InstallingTemplate = "Installing template..."
+        TemplateInstalled  = "Template installed."
+        TemplateInstallFail = "Template installation failed."
     }
 }
 
@@ -372,6 +378,26 @@ function Localize-ScriptFile {
 }
 
 # ============================================================
+# 自动安装模板
+# ============================================================
+
+$templateDir = $PSScriptRoot
+
+Write-Host ""
+Write-Host (Get-Str 'InstallingTemplate') -ForegroundColor Cyan
+
+try {
+    $installResult = & dotnet new install $templateDir 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "$(Get-Str 'TemplateInstallFail') $installResult"
+    } else {
+        Write-Host (Get-Str 'TemplateInstalled') -ForegroundColor Green
+    }
+} catch {
+    Write-Warning "$(Get-Str 'TemplateInstallFail') $_"
+}
+
+# ============================================================
 # 设置编码
 # ============================================================
 $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -555,7 +581,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warrantyof
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
