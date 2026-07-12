@@ -1,17 +1,17 @@
 # Moss-Template
 
-一个用于开发 `Casualties Unknown` 模组的 [dotnet new](https://learn.microsoft.com/zh-cn/dotnet/core/tools/dotnet-new)
-模板。
+A [dotnet new](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new) template for developing
+`Casualties Unknown` mods.
 
-基于 [05126619z/ScavTemplate](https://github.com/05126619z/ScavTemplate)。
+Based on [05126619z/ScavTemplate](https://github.com/05126619z/ScavTemplate).
 
 ---
 
-## 快速开始
+## Quick Start
 
-### 方式一：使用 `NewMod.ps1`（推荐）
+### Method 1: Using `NewMod.ps1` (Recommended)
 
-1. 克隆本仓库并注册模板：
+1. Clone this repository and register the template:
 
 ```powershell
 git clone https://github.com/CNCUMC/Moss-Template.git
@@ -19,158 +19,163 @@ cd Moss-Template
 dotnet new install .
 ```
 
-2. 在任意目录运行创建脚本：
+2. Run the creation script in any directory:
 
 ```powershell
-cd E:/Projects  # 你想创建项目的目录
+cd E:/Projects  # Directory where you want to create the project
 <path-to>\NewMod.ps1
 ```
 
-脚本会自动：
+The script will automatically:
 
-- 搜索 Steam 安装路径中的 Casualties Unknown 游戏目录
-- 交互式提示输入模组名称、GUID、版本等信息
-- 调用 `dotnet new mosstemplate` 生成项目
-- 所有文件名和内容自动替换完成
+- Search for Casualties Unknown game directory in Steam installation paths
+- Interactively prompt for mod name, GUID, version, etc.
+- Call `dotnet new mosstemplate` to generate the project
+- All file names and content automatically replaced
 
-3. 构建并测试：
+3. Build and test:
 
 ```powershell
 cd MyCoolMod
 dotnet build
 ```
 
-### 方式二：使用 `dotnet new` 命令
+### Method 2: Using `dotnet new` command
 
-注册模板后（见上方第 1 步），直接使用命令行：
+After registering the template (see step 1 above), use the command line directly:
 
 ```powershell
 dotnet new mosstemplate -n MyCoolMod `
     --ModDisplayName "My Cool Mod" `
-    --ModGuid "com.example.mymod" `
+    --ModGuid "com.example.mycoolmod" `
     --ModVersion "1.0.0" `
     --AuthorName "Your Name" `
-    --GameRootPath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" `
-    --Language "zh-CN"
+    --GameRootPath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo"
 ```
 
-### 方式三：从 GitHub 克隆（传统方式）
+### Method 3: Clone from GitHub (Traditional)
 
-1. 在 GitHub 上点击 [Use this template](https://github.com/new?template_name=Moss-Template) 创建仓库
-2. 克隆仓库后手动替换文件名和内容中的 `MossTemplate`
-3. 参考下方手动配置步骤
+1. Click [Use this template](https://github.com/new?template_name=Moss-Template) on GitHub to create a repository
+2. After cloning, manually replace `MossTemplate` in file names and content
+3. Refer to the manual configuration steps below
 
 ---
 
-## 模板参数说明
+## Template Parameters
 
-| 参数                 | 说明                             | 默认值                 |
-|--------------------|--------------------------------|---------------------|
-| `-n` / `--name`    | 项目名称（PascalCase，如 `MyCoolMod`） | 必填                  |
-| `--ModDisplayName` | 模组显示名称（如 `My Cool Mod`）        | 从名称自动生成             |
-| `--ModGuid`        | 模组唯一标识（格式 `yourname.modname`）  | `com.example.mymod` |
-| `--ModVersion`     | 初始版本号                          | `1.0.0`             |
-| `--AuthorName`     | 作者名称（用于 LICENSE）               | `Your Name`         |
-| `--GameRootPath`   | 游戏根目录路径                      | Steam 默认路径          |
-| `--Language`       | 生成文件的语言 (`zh-CN` 或 `en-US`) | `zh-CN`             |
+| Parameter          | Description                                       | Default Value            |
+|--------------------|---------------------------------------------------|--------------------------|
+| `-n` / `--name`    | Project name (PascalCase, e.g. `MyCoolMod`)       | Required                 |
+| `--ModDisplayName` | Mod display name (e.g. `My Cool Mod`)             | Auto-generated from name |
+| `--ModGuid`        | Unique mod GUID (format: `yourname.modname`)      | `com.example.mymod`      |
+| `--ModVersion`     | Initial version number                            | `1.0.0`                  |
+| `--AuthorName`     | Author name (for LICENSE)                         | `Your Name`              |
+| `--GameRootPath`   | Game root directory path                          | Steam default path       |
+| `--Language`       | Language for generated files (`zh-CN` or `en-US`) | `zh-CN`                  |
 
-模板会自动替换以下内容：
+The template automatically replaces:
 
-- `MossTemplate.csproj` → `{项目名}.csproj`
-- `namespace MossTemplate` → `namespace {项目名}`
+- `MossTemplate.csproj` → `{ProjectName}.csproj`
+- `namespace MossTemplate` → `namespace {ProjectName}`
 - `org.explosivehydra.mosstemplate` → `{ModGuid}`
 - `Moss Template` → `{ModDisplayName}`
-- 版本号、LICENSE 作者名、csproj 中的游戏 DLL 路径
+- Version number, LICENSE author name, game DLL paths in csproj
 
 ---
 
-## 关于 StartGame.ps1
+## About StartGame.ps1
 
-[StartGame.ps1](StartGame.ps1) 会将编译好的 DLL 文件复制到游戏目录下的 BepInEx 插件目录，并自动启动游戏。
+[StartGame.ps1](StartGame.ps1) copies the compiled DLL file to the BepInEx plugin directory in the game directory and
+automatically launches the game.
 
-**参数：**
+**Parameters:**
 
-- `$GamePath` — 游戏安装目录（如 `E:/SteamLibrary/steamapps/common/Casualties Unknown Demo`）
-- `$ModNamespace` — 模组命名空间（如 `MyCoolMod`）
+- `$GamePath` — Game installation directory (e.g. `E:/SteamLibrary/steamapps/common/Casualties Unknown Demo`)
+- `$ModNamespace` — Mod namespace (e.g. `MyCoolMod`)
 
-**命令行运行：**
+**Command line usage:**
 
 ```powershell
 .\StartGame.ps1 -GamePath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" -ModNamespace "MyCoolMod"
 ```
 
-### JetBrains Rider 配置
+### JetBrains Rider Configuration
 
-1. 右键 [StartGame.ps1](StartGame.ps1) → `运行 'StartGame.ps1'`
-2. 点击编辑器右上角构建按钮旁的 `StartGame.ps1` 按钮 → `编辑配置...`
-3. 填写 `Script arguments:`：`"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "MyCoolMod"`
-4. 设置 `Command parameters`：`-ExecutionPolicy Bypass`
-5. 点击 `执行前` 旁的加号 → `构建解决方案` → 确定
+1. Right-click [StartGame.ps1](StartGame.ps1) → `Run 'StartGame.ps1'`
+2. Click the `StartGame.ps1` button next to the build button in the top-right corner → `Edit Configurations...`
+3. Fill in `Script arguments:` with: `"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "MyCoolMod"`
+4. Set `Command parameters` to: `-ExecutionPolicy Bypass`
+5. Click the plus next to `Before launch` → `Build Solution` → OK
 
-之后每次按绿三角按钮即可自动构建、复制 DLL、启动游戏。
+After that, each time you press the green triangle button next to the build button, the mod's DLL will be automatically
+copied to the BepInEx plugin directory and the game will start.
 
 ### Visual Studio
 
-右键 [StartGame.ps1](StartGame.ps1) 选择 `运行`，手动填写参数。具体配置方式请自行研究。:P
+Right-click [StartGame.ps1](StartGame.ps1) and select `Run`, then manually fill in the parameters. Figure out the
+specific configuration yourself. :P
 
 ---
 
-## 发布模组 (Release.ps1)
+## Publishing Mods (Release.ps1)
 
-[Release.ps1](Release.ps1) 用于构建、打包并发布模组到 NexusMods 和 GitHub Release。
+[Release.ps1](Release.ps1) is used to build, package, and publish mods to NexusMods and GitHub Release.
 
-**基本用法：**
+**Basic usage:**
+
 ```powershell
-.\Release.ps1                          # 交互式确认版本号后发布
-.\Release.ps1 -SkipNexus               # 只发 GitHub
-.\Release.ps1 -SkipBuild -SkipGitHub   # 只发 NexusMods（跳过构建）
+.\Release.ps1                          # Interactive version confirmation then publish
+.\Release.ps1 -SkipNexus               # Publish to GitHub only
+.\Release.ps1 -SkipBuild -SkipGitHub   # Publish to NexusMods only (skip build)
 ```
 
-### NexusMods API Key 设置
+### NexusMods API Key Setup
 
-1. 登录 [NexusMods](https://www.nexusmods.com/)
-2. 进入 [API Access](https://www.nexusmods.com/casualtiesunknown/users/myaccount?tab=api) 页面
-3. 点击 `REQUEST API KEY` 获取 Key
+1. Log in to [NexusMods](https://www.nexusmods.com/)
+2. Go to [API Access](https://www.nexusmods.com/casualtiesunknown/users/myaccount?tab=api) page
+3. Click `REQUEST API KEY` to get your Key
 
-**使用方式：**
+**Usage:**
+
 ```powershell
-# 环境变量（推荐，一次设置永久有效）
-$env:NEXUS_API_KEY = "你的API Key"
+# Environment variable (recommended, set once and persists)
+$env:NEXUS_API_KEY = "your-api-key"
 .\Release.ps1
 
-# 或命令行参数
-.\Release.ps1 -NexusApiKey "你的API Key"
+# Or command line parameter
+.\Release.ps1 -NexusApiKey "your-api-key"
 ```
 
-### GitHub 认证
+### GitHub Authentication
 
 ```powershell
-# 安装 GitHub CLI
+# Install GitHub CLI
 winget install GitHub.cli
 
-# 登录
+# Log in
 gh auth login
 ```
 
 ---
 
-## csproj 引用说明
+## csproj Reference
 
-模板包含 15 个核心游戏 DLL 引用。所有路径通过 `Directory.Build.props` 中的 MSBuild 属性管理：
+The template includes 15 core game DLL references. All paths are managed through MSBuild properties in
+`Directory.Build.props`:
 
-| 属性 | 说明 | 示例 |
-|------|------|------|
-| `$(GameDir)` | 游戏根目录 | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
-| `$(ManagedDir)` | Managed 目录 | `$(GameDir)/CasualtiesUnknown_Data/Managed` |
-| `$(CUCoreLibDll)` | CUCoreLib 路径（可选） | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll` |
+| Property          | Description               | Example                                                    |
+|-------------------|---------------------------|------------------------------------------------------------|
+| `$(GameDir)`      | Game root directory       | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
+| `$(ManagedDir)`   | Managed directory         | `$(GameDir)/CasualtiesUnknown_Data/Managed`                |
+| `$(CUCoreLibDll)` | CUCoreLib path (optional) | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll`                 |
 
-如需额外引用（如动画、音频、粒子等），在 csproj 中取消注释或添加新条目：
+To add additional references (e.g. animation, audio, particles), uncomment or add new entries in csproj:
 
 ```xml
-<!-- 例如：添加音频模块 -->
+<!-- Example: Add audio module -->
 <Reference Include="UnityEngine.AudioModule">
     <HintPath>$(ManagedDir)/UnityEngine.AudioModule.dll</HintPath>
 </Reference>
 ```
 
-> **注意：** 首次使用时复制 `Directory.Build.props.example` 为 `Directory.Build.props` 并填写你的游戏路径。
+> **Note:** On first use, copy `Directory.Build.props.example` to `Directory.Build.props` and fill in your game path.

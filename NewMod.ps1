@@ -15,7 +15,7 @@
     如果不指定，将自动从 ModName 按大驼峰拆分生成。
 
 .PARAMETER ModGuid
-    模组的唯一 GUID，格式为 "yourname.modname"（如 "com.example.mycoolmod"）。
+    模组的唯一 GUID，格式为 "yourname.modname"（如 "com.example.mymod"）。
 
 .PARAMETER ModVersion
     模组的初始版本号（如 "1.0.0"）。
@@ -26,15 +26,18 @@
 .PARAMETER GameRootPath
     游戏根目录的完整路径。如果不指定，将自动从 Steam 常见安装路径中检测。
 
+.PARAMETER Language
+    脚本界面语言 ("zh-CN" 或 "en-US")。
+
 .PARAMETER OutputDir
     项目输出目录。如果不指定，则使用当前目录下与 ModName 同名的子目录。
 
 .EXAMPLE
-    .\NewMod.ps1 -ModName "MyCoolMod" -ModGuid "com.example.mycoolmod"
+    .\NewMod.ps1 -ModName "MyCoolMod" -ModGuid "com.example.mymod"
 
 .EXAMPLE
-    .\NewMod.ps1
-    # 交互式输入所有参数，自动检测游戏路径
+    .\NewMod.ps1 -Language en-US
+    # Interactive input in English
 
 .NOTES
     需要已安装 .NET SDK 并注册了 mosstemplate 模板。
@@ -48,8 +51,215 @@ param(
     [string]$AuthorName,
     [string]$GameRootPath,
     [string]$LicenseType,
+    [string]$Language = "en-US",
     [string]$OutputDir
 )
+
+# ============================================================
+# 字符串资源 (NewMod.ps1 界面)
+# ============================================================
+
+$Strings = @{
+    zh-CN = @{
+        Title             = "Casualties Unknown Mod Creator"
+        Subtitle          = "Moss-Template 模组创建向导"
+        NamespacePrompt   = "输入模组命名空间 (PascalCase, 不能有空格, 如 MyCoolMod)"
+        NamespaceError    = "命名空间不能包含空格"
+        DisplayNamePrompt = "输入模组显示名称"
+        GuidPrompt        = "输入模组 GUID (格式: yourname.modname)"
+        VersionPrompt     = "输入模组版本号"
+        AuthorPrompt      = "输入作者名称 (用于 LICENSE)"
+        LicenseChoice     = "选择许可证:"
+        LicenseMIT        = "1. MIT (宽松，推荐大多数情况)"
+        LicenseGPL        = "2. GPL v3 (要求衍生作品也开源)"
+        LicenseLGPL       = "3. LGPL v3 (允许闭源使用，修改需开源)"
+        LicenseInput      = "输入选择 (1-3, 默认: 1)"
+        SearchingGame     = "正在搜索 Casualties Unknown 游戏路径..."
+        GameFound         = "已找到游戏目录"
+        GameNotFound      = "未自动找到游戏目录，请手动输入。"
+        GamePathPrompt    = "输入游戏根目录路径"
+        GamePathDefault   = "如 E:/SteamLibrary/steamapps/common/Casualties Unknown Demo"
+        GamePathNotExist  = "游戏目录不存在"
+        NeedManualFix     = "项目将被创建，但你需要手动修改 Directory.Build.props 中的游戏路径。"
+        OutputDirPrompt   = "输入项目输出目录"
+        ConfigSummary     = "配置摘要"
+        SummaryNamespace  = "命名空间/项目名"
+        SummaryDisplay    = "显示名称"
+        SummaryGUID       = "GUID"
+        SummaryVersion    = "版本号"
+        SummaryAuthor     = "作者"
+        SummaryGameDir    = "游戏根目录"
+        SummaryOutput     = "输出目录"
+        ConfirmCreate     = "确认创建? (Y/n)"
+        Cancelled         = "已取消。"
+        CreatingProject   = "正在创建项目..."
+        TemplateNotReg    = "如果 mosstemplate 模板未安装，请先执行以下命令注册:"
+        FilledRelease     = "已填入 Release.ps1 模组信息"
+        GPLUsed           = "已使用 GPL v3 许可证: LICENSE.md"
+        LGPLUsed          = "已使用 LGPL v3 许可证: LICENSE.md"
+        MITUsed           = "已使用 MIT 许可证: LICENSE.md"
+        LicenseTypeLabel  = "许可证类型"
+        PropsCreated      = "已创建: Directory.Build.props"
+        CleaningGit       = "清理模板 Git 仓库..."
+        InitGit           = "初始化新 Git 仓库..."
+        GitInitDone       = "Git 仓库已初始化并完成首次提交。"
+        GitInitFail       = "Git 初始化失败"
+        RiderConfig       = "生成 Rider 运行配置..."
+        RiderCreated      = "已创建: .run/StartGame.run.xml"
+        Success           = "项目创建成功!"
+        NextSteps         = "下一步"
+        Step1             = "1. cd $OutputDir"
+        Step2             = "2. 编辑 Directory.Build.props 填写游戏路径"
+        Step3             = "3. dotnet build  (验证编译)"
+        Step4             = "4. 右键 StartGame.ps1 运行测试"
+        DefaultAuthor     = "Your Name"
+        DefaultVersion    = "1.0.0"
+        DefaultGUIDPrefix = "com.example."
+        DefaultOutput     = ""
+    }
+    en-US = @{
+        Title             = "Casualties Unknown Mod Creator"
+        Subtitle          = "Moss-Template Mod Creation Wizard"
+        NamespacePrompt   = "Enter mod namespace (PascalCase, no spaces, e.g. MyCoolMod)"
+        NamespaceError    = "Namespace cannot contain spaces"
+        DisplayNamePrompt = "Enter mod display name"
+        GuidPrompt        = "Enter mod GUID (format: yourname.modname)"
+        VersionPrompt     = "Enter mod version"
+        AuthorPrompt      = "Enter author name (for LICENSE)"
+        LicenseChoice     = "Choose license:"
+        LicenseMIT        = "1. MIT (permissive, recommended for most cases)"
+        LicenseGPL        = "2. GPL v3 (requires derivative works to be open source)"
+        LicenseLGPL       = "3. LGPL v3 (allows closed-source use, modifications must be open)"
+        LicenseInput      = "Enter choice (1-3, default: 1)"
+        SearchingGame     = "Searching for Casualties Unknown game directory..."
+        GameFound         = "Found game directory"
+        GameNotFound      = "Game directory not found automatically."
+        GamePathPrompt    = "Enter game root directory path"
+        GamePathDefault   = "e.g. E:/SteamLibrary/steamapps/common/Casualties Unknown Demo"
+        GamePathNotExist  = "Game directory does not exist"
+        NeedManualFix     = "Project will be created, but you need to manually fix the game path in Directory.Build.props."
+        OutputDirPrompt   = "Enter project output directory"
+        ConfigSummary     = "Configuration Summary"
+        SummaryNamespace  = "Namespace/Project"
+        SummaryDisplay    = "Display Name"
+        SummaryGUID       = "GUID"
+        SummaryVersion    = "Version"
+        SummaryAuthor     = "Author"
+        SummaryGameDir    = "Game Directory"
+        SummaryOutput     = "Output Directory"
+        ConfirmCreate     = "Proceed? (Y/n)"
+        Cancelled         = "Cancelled."
+        CreatingProject   = "Creating project..."
+        TemplateNotReg    = "If mosstemplate is not installed, run:"
+        FilledRelease     = "Filled Release.ps1 mod info"
+        GPLUsed           = "Using GPL v3 license: LICENSE.md"
+        LGPLUsed          = "Using LGPL v3 license: LICENSE.md"
+        MITUsed           = "Using MIT license: LICENSE.md"
+        LicenseTypeLabel  = "License Type"
+        PropsCreated      = "Created: Directory.Build.props"
+        CleaningGit       = "Cleaning template git repository..."
+        InitGit           = "Initializing new git repository..."
+        GitInitDone       = "Git repository initialized with first commit."
+        GitInitFail       = "Git init failed"
+        RiderConfig       = "Generating Rider run configuration..."
+        RiderCreated      = "Created: .run/StartGame.run.xml"
+        Success           = "Project created successfully!"
+        NextSteps         = "Next steps"
+        Step1             = "1. cd $OutputDir"
+        Step2             = "2. Edit Directory.Build.props to set game path"
+        Step3             = "3. dotnet build  (verify compilation)"
+        Step4             = "4. Right-click StartGame.ps1 to run"
+        DefaultAuthor     = "Your Name"
+        DefaultVersion    = "1.0.0"
+        DefaultGUIDPrefix = "com.example."
+        DefaultOutput     = ""
+    }
+}
+
+# ============================================================
+# 生成脚本的本地化字符串 (Release.ps1 / StartGame.ps1)
+# ============================================================
+
+$ScriptI18n = @{
+    "Release.ps1" = @{
+        "模组信息:"                           = "Mod Info:"
+        "命名空间:"                           = "Namespace:"
+        "显示名称:"                           = "Display Name:"
+        "版本号:"                             = "Version:"
+        "输入版本号 (默认: $ModVersion)"      = "Enter version (default: $ModVersion)"
+        "构建项目 ($Configuration)..."        = "Building project ($Configuration)..."
+        "构建失败:`n$buildResult"             = "Build failed:`n$buildResult"
+        "构建成功"                            = "Build succeeded"
+        "收集文件并创建压缩包..."              = "Collecting files and creating archive..."
+        "已添加: $ModNamespace.dll"           = "Added: $ModNamespace.dll"
+        "未找到 DLL: $dllSource"              = "DLL not found: $dllSource"
+        "已添加: $doc"                        = "Added: $doc"
+        "从 CHANGELOG.md 读取发布说明"         = "Read release notes from CHANGELOG.md"
+        "从 CHANGELOG.md 读取发布说明 (前 20 行)" = "Read release notes from CHANGELOG.md (first 20 lines)"
+        "已生成 NexusMods BBCode 发布说明"     = "Generated NexusMods BBCode release notes"
+        "从部署目录添加: $($f.Name)"           = "Added from deploy dir: $($f.Name)"
+        "复制文档文件失败: $_"                = "Failed to copy document files: $_"
+        "压缩包: $zipName ($zipSizeMB MB)"    = "Archive: $zipName ($zipSizeMB MB)"
+        "上传到 NexusMods..."                 = "Uploading to NexusMods..."
+        "未设置 NexusMods API Key。设置环境变量 NEXUS_API_KEY 或使用 -NexusApiKey 参数。" = "NexusMods API Key not set. Set environment variable NEXUS_API_KEY or use -NexusApiKey parameter."
+        "未设置 NexusMods Mod ID。使用 -NexusModId 参数指定。" = "NexusMods Mod ID not set. Use -NexusModId parameter."
+        "创建上传会话..."                     = "Creating upload session..."
+        "上传会话已创建: $uploadId"            = "Upload session created: $uploadId"
+        "上传文件中 ($zipSizeMB MB)..."       = "Uploading file ($zipSizeMB MB)..."
+        "[已知问题] S3 预签名 URL 签名不匹配 (NexusMods API bug)" = "[Known issue] S3 presigned URL signature mismatch (NexusMods API bug)"
+        "压缩包已生成: $zipPath"              = "Archive created: $zipPath"
+        "请通过 NexusMods 网页手动上传。"      = "Please upload manually via NexusMods website."
+        "S3 PUT 失败: $($putResponse.StatusCode) - 请手动上传到 NexusMods" = "S3 PUT failed: $($putResponse.StatusCode) - Please upload manually to NexusMods"
+        "文件已上传"                          = "File uploaded"
+        "确认上传..."                         = "Finalizing upload..."
+        "上传已确认"                          = "Upload finalized"
+        "创建 Mod 文件条目..."                = "Creating mod file entry..."
+        "Mod 文件已创建 (ID: $($modFile.data.id))" = "Mod file created (ID: $($modFile.data.id))"
+        "NexusMods 上传完成!"                 = "NexusMods upload complete!"
+        "NexusMods 上传失败: $_"              = "NexusMods upload failed: $_"
+        "API 响应: $errorBody"                = "API response: $errorBody"
+        "上传到 GitHub Release..."            = "Uploading to GitHub Release..."
+        "gh CLI 未安装。请运行: winget install GitHub.cli" = "gh CLI not installed. Run: winget install GitHub.cli"
+        "gh 未认证。请运行: gh auth login"     = "gh not authenticated. Run: gh auth login"
+        "执行: gh $($ghArgs -join ' ')"        = "Running: gh $($ghArgs -join ' ')"
+        "GitHub Release 已创建: $tagName"     = "GitHub Release created: $tagName"
+        "GitHub Release 创建失败 (exit code: $LASTEXITCODE)" = "GitHub Release creation failed (exit code: $LASTEXITCODE)"
+        "GitHub Release 失败: $_"             = "GitHub Release failed: $_"
+        "发布完成!"                           = "Release complete!"
+        "压缩包: $zipName"                    = "Archive: $zipName"
+        "大小:   $zipSizeMB MB"               = "Size:   $zipSizeMB MB"
+    }
+    "StartGame.ps1" = @{
+        "游戏路径无效或不是目录: $GamePath"    = "Game path invalid or not a directory: $GamePath"
+        "正在复制 BepInEx 日志到 ""$logDestination""。" = "Copying BepInEx logs to ""$logDestination""."
+        "复制 BepInEx 日志失败: $_"           = "Failed to copy BepInEx logs: $_"
+        "已清空之前的日志文件。"               = "Cleared previous game logs."
+        "游戏路径: $GamePath"                 = "Game path: $GamePath"
+        "模组命名空间: $ModNamespace"          = "Mod namespace: $ModNamespace"
+        "模组名称: $ModName"                  = "Mod name: $ModName"
+        "目标文件夹: $targetModFolder"          = "Target folder: $targetModFolder"
+        "正在复制模组 DLL 到 ""$pluginPath\$ModNamespace.dll""。" = "Copying mod DLL to ""$pluginPath\$ModNamespace.dll""."
+        "复制模组 DLL 失败: $_"                = "Failed to copy mod DLL: $_"
+        "正在复制文档文件 ""$docFile"" 到 ""$destDocFilePath""。" = "Copying document file ""$docFile"" to ""$destDocFilePath""."
+        "文档文件 ""$docFile"" 不存在，跳过。"  = "Document file ""$docFile"" not found, skipping."
+        "已成功复制 $copiedDocs 个文档文件到插件目录。" = "Successfully copied $copiedDocs document file(s) to plugin directory."
+        "复制文档文件失败: $_"                 = "Failed to copy document files: $_"
+        "游戏进程已启动, PID: $( $gameProcess.Id )" = "Game process started, PID: $( $gameProcess.Id )"
+        "游戏进程已退出。"                      = "Game process exited."
+        "启动游戏进程失败: $_"                  = "Failed to start game process: $_"
+        "正在终止游戏进程..."                   = "Terminating game process..."
+    }
+}
+
+$Lang = $Strings[$Language]
+if (-not $Lang) {
+    $Lang = $Strings["en-US"]
+}
+
+function Get-Str {
+    param([string]$Key)
+    return $Lang[$Key]
+}
 
 # ============================================================
 # 辅助函数
@@ -77,13 +287,13 @@ function Read-Input {
         [switch]$Required
     )
     if ($DefaultValue) {
-        $userInput = Read-Host "$Prompt (默认: $DefaultValue)"
+        $userInput = Read-Host "$Prompt (default: $DefaultValue)"
         if ([string]::IsNullOrWhiteSpace($userInput)) { return $DefaultValue }
     } else {
         $userInput = Read-Host $Prompt
     }
     if ($Required -and [string]::IsNullOrWhiteSpace($userInput)) {
-        Write-Error "此项为必填项，请重新运行脚本并提供有效值。"
+        Write-Error "This field is required."
         exit 1
     }
     return $userInput
@@ -91,17 +301,11 @@ function Read-Input {
 
 function Find-GameManagedDir {
     $gameRelativePath = "steamapps\common\Casualties Unknown Demo\CasualtiesUnknown_Data\Managed"
-
     $steamCandidates = @(
         "C:\Program Files (x86)\Steam",
-        "D:\SteamLibrary",
-        "E:\SteamLibrary",
-        "F:\SteamLibrary",
-        "D:\Steam",
-        "E:\Steam",
-        "F:\Steam"
+        "D:\SteamLibrary", "E:\SteamLibrary", "F:\SteamLibrary",
+        "D:\Steam", "E:\Steam", "F:\Steam"
     )
-
     try {
         $steamRegPath = Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam" -Name "InstallPath" -ErrorAction SilentlyContinue
         if ($steamRegPath -and $steamRegPath.InstallPath) {
@@ -141,8 +345,30 @@ function Find-GameManagedDir {
             return $normalizedPath
         }
     }
-
     return $null
+}
+
+function Localize-ScriptFile {
+    param(
+        [string]$ScriptPath,
+        [string]$FileName
+    )
+    
+    if (-not (Test-Path $ScriptPath)) { return }
+    
+    $i18nMap = $ScriptI18n[$FileName]
+    if (-not $i18nMap) { return }
+    
+    $content = [System.IO.File]::ReadAllText($ScriptPath, [System.Text.Encoding]::UTF8)
+    
+    foreach ($chinese in $i18nMap.Keys) {
+        $english = $i18nMap[$chinese]
+        if ($Language -eq "en-US") {
+            $content = $content.Replace($chinese, $english)
+        }
+    }
+    
+    [System.IO.File]::WriteAllText($ScriptPath, $content, [System.Text.UTF8Encoding]::new($true))
 }
 
 # ============================================================
@@ -159,78 +385,75 @@ chcp 65001 > $null
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Casualties Unknown Mod Creator" -ForegroundColor Cyan
-Write-Host "  Moss-Template 模组创建向导" -ForegroundColor Cyan
+Write-Host "  $(Get-Str 'Title')" -ForegroundColor Cyan
+Write-Host "  $(Get-Str 'Subtitle')" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 if ([string]::IsNullOrWhiteSpace($ModName)) {
-    $ModName = Read-Input -Prompt "输入模组命名空间 (PascalCase, 不能有空格, 如 MyCoolMod)" -Required
+    $ModName = Read-Input -Prompt (Get-Str 'NamespacePrompt') -Required
 }
 
 if ($ModName -match '\s') {
-    Write-Error "命名空间不能包含空格: '$ModName'"
+    Write-Error "$(Get-Str 'NamespaceError'): '$ModName'"
     exit 1
 }
 
 if ([string]::IsNullOrWhiteSpace($ModDisplayName)) {
     $autoDisplayName = Convert-ToDisplayName -Name $ModName
-    $ModDisplayName = Read-Input -Prompt "输入模组显示名称" -DefaultValue $autoDisplayName
+    $ModDisplayName = Read-Input -Prompt (Get-Str 'DisplayNamePrompt') -DefaultValue $autoDisplayName
 }
 
 if ([string]::IsNullOrWhiteSpace($ModGuid)) {
     $defaultGuid = "com.example.$($ModName.ToLower())"
-    $ModGuid = Read-Input -Prompt "输入模组 GUID (格式: yourname.modname)" -DefaultValue $defaultGuid -Required
+    $ModGuid = Read-Input -Prompt (Get-Str 'GuidPrompt') -DefaultValue $defaultGuid -Required
 }
 
 if ([string]::IsNullOrWhiteSpace($ModVersion)) {
-    $ModVersion = Read-Input -Prompt "输入模组版本号" -DefaultValue "1.0.0"
+    $ModVersion = Read-Input -Prompt (Get-Str 'VersionPrompt') -DefaultValue (Get-Str 'DefaultVersion')
 }
 
 if ([string]::IsNullOrWhiteSpace($AuthorName)) {
-    $AuthorName = Read-Input -Prompt "输入作者名称 (用于 LICENSE)" -DefaultValue "Your Name"
+    $AuthorName = Read-Input -Prompt (Get-Str 'AuthorPrompt') -DefaultValue (Get-Str 'DefaultAuthor')
 }
 
-# LicenseType - 许可证选择
 if ([string]::IsNullOrWhiteSpace($LicenseType)) {
     Write-Host ""
-    Write-Host "选择许可证:" -ForegroundColor Yellow
-    Write-Host "  1. MIT (宽松，推荐大多数情况)" -ForegroundColor White
-    Write-Host "  2. GPL v3 (要求衍生作品也开源，参考 Custom-Fungame-Pack)" -ForegroundColor White
-    $choice = Read-Host "输入选择 (1 或 2, 默认: 1)"
-    if ($choice -eq "2") {
-        $LicenseType = "GPL-3.0"
-    } else {
-        $LicenseType = "MIT"
+    Write-Host (Get-Str 'LicenseChoice') -ForegroundColor Yellow
+    Write-Host "  $(Get-Str 'LicenseMIT')" -ForegroundColor White
+    Write-Host "  $(Get-Str 'LicenseGPL')" -ForegroundColor White
+    Write-Host "  $(Get-Str 'LicenseLGPL')" -ForegroundColor White
+    $choice = Read-Host (Get-Str 'LicenseInput')
+    switch ($choice) {
+        "2" { $LicenseType = "GPL-3.0" }
+        "3" { $LicenseType = "LGPL-3.0" }
+        default { $LicenseType = "MIT" }
     }
 }
 
-# GameRootPath - 自动检测
 if ([string]::IsNullOrWhiteSpace($GameRootPath)) {
     Write-Host ""
-    Write-Host "正在搜索 Casualties Unknown 游戏路径..." -ForegroundColor Cyan
-
+    Write-Host (Get-Str 'SearchingGame') -ForegroundColor Cyan
     $detectedManagedPath = Find-GameManagedDir
-
     if ($detectedManagedPath) {
         $detectedRoot = (Resolve-Path (Join-Path $detectedManagedPath "..\..")).Path
         $detectedRoot = $detectedRoot.Replace('\', '/')
-        Write-Host "  已找到游戏目录: $detectedRoot" -ForegroundColor Green
-        $GameRootPath = Read-Input -Prompt "输入游戏根目录路径" -DefaultValue $detectedRoot
+        Write-Host "  $(Get-Str 'GameFound'): $detectedRoot" -ForegroundColor Green
+        $GameRootPath = Read-Input -Prompt (Get-Str 'GamePathPrompt') -DefaultValue $detectedRoot
     } else {
-        Write-Host "  未自动找到游戏目录，请手动输入。" -ForegroundColor Yellow
-        $GameRootPath = Read-Input -Prompt "输入游戏根目录路径 (如 E:/SteamLibrary/steamapps/common/Casualties Unknown Demo)" -Required
+        Write-Host "  $(Get-Str 'GameNotFound')" -ForegroundColor Yellow
+        $GameRootPath = Read-Input -Prompt "$(Get-Str 'GamePathPrompt') ($(Get-Str 'GamePathDefault'))" -Required
     }
 }
 
 $GameRootPath = $GameRootPath.Replace('\', '/')
 if (-not (Test-Path $GameRootPath -PathType Container)) {
-    Write-Warning "游戏目录不存在: $GameRootPath"
-    Write-Warning "项目将被创建，但你需要手动修改 Directory.Build.props 中的游戏路径。"
+    Write-Warning "$(Get-Str 'GamePathNotExist'): $GameRootPath"
+    Write-Warning (Get-Str 'NeedManualFix')
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputDir)) {
-    $OutputDir = Read-Input -Prompt "输入项目输出目录" -DefaultValue $ModName
+    $OutputDir = Read-Input -Prompt (Get-Str 'OutputDirPrompt') -DefaultValue $ModName
 }
 
 # ============================================================
@@ -239,20 +462,20 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
 
 Write-Host ""
 Write-Host "----------------------------------------" -ForegroundColor Yellow
-Write-Host "配置摘要:" -ForegroundColor Yellow
-Write-Host "  命名空间/项目名: $ModName" -ForegroundColor White
-Write-Host "  显示名称:        $ModDisplayName" -ForegroundColor White
-Write-Host "  GUID:            $ModGuid" -ForegroundColor White
-Write-Host "  版本号:          $ModVersion" -ForegroundColor White
-Write-Host "  作者:            $AuthorName" -ForegroundColor White
-Write-Host "  游戏根目录:      $GameRootPath" -ForegroundColor White
-Write-Host "  输出目录:        $OutputDir" -ForegroundColor White
+Write-Host "$(Get-Str 'ConfigSummary'):" -ForegroundColor Yellow
+Write-Host "  $(Get-Str 'SummaryNamespace'): $ModName" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryDisplay'): $ModDisplayName" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryGUID'): $ModGuid" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryVersion'): $ModVersion" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryAuthor'): $AuthorName" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryGameDir'): $GameRootPath" -ForegroundColor White
+Write-Host "  $(Get-Str 'SummaryOutput'): $OutputDir" -ForegroundColor White
 Write-Host "----------------------------------------" -ForegroundColor Yellow
 Write-Host ""
 
-$confirm = Read-Host "确认创建? (Y/n)"
+$confirm = Read-Host (Get-Str 'ConfirmCreate')
 if ($confirm -eq 'n' -or $confirm -eq 'N') {
-    Write-Host "已取消。" -ForegroundColor Red
+    Write-Host (Get-Str 'Cancelled') -ForegroundColor Red
     exit 0
 }
 
@@ -261,7 +484,7 @@ if ($confirm -eq 'n' -or $confirm -eq 'N') {
 # ============================================================
 
 Write-Host ""
-Write-Host "正在创建项目..." -ForegroundColor Cyan
+Write-Host (Get-Str 'CreatingProject') -ForegroundColor Cyan
 
 $dotnetArgs = @(
     "new", "mosstemplate",
@@ -272,25 +495,28 @@ $dotnetArgs = @(
     "--AuthorName", $AuthorName,
     "--GameRootPath", $GameRootPath,
     "--ModNamespace", $ModName,
+    "--Language", $Language,
     "-o", $OutputDir
 )
 
-Write-Host "  执行: dotnet $($dotnetArgs -join ' ')" -ForegroundColor DarkGray
+Write-Host "  dotnet $($dotnetArgs -join ' ')" -ForegroundColor DarkGray
 Write-Host ""
 
 & dotnet @dotnetArgs
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "dotnet new 执行失败 (退出码: $LASTEXITCODE)"
+    Write-Error "dotnet new failed (exit code: $LASTEXITCODE)"
     Write-Host ""
-    Write-Host "如果 mosstemplate 模板未安装，请先执行以下命令注册:" -ForegroundColor Yellow
-    Write-Host "  dotnet new install <Moss-Template 项目路径>" -ForegroundColor Yellow
+    Write-Host (Get-Str 'TemplateNotReg') -ForegroundColor Yellow
+    Write-Host "  dotnet new install <Moss-Template project path>" -ForegroundColor Yellow
     exit $LASTEXITCODE
 }
 
 # ============================================================
 # 替换 Release.ps1 中的占位符
 # ============================================================
+
+$projectPath = Resolve-Path $OutputDir
 
 $releasePs1Path = Join-Path $projectPath "Release.ps1"
 if (Test-Path $releasePs1Path) {
@@ -299,8 +525,15 @@ if (Test-Path $releasePs1Path) {
     $releaseContent = $releaseContent.Replace("__MOD_DISPLAY_NAME__", $ModDisplayName)
     $releaseContent = $releaseContent.Replace("__MOD_VERSION__", $ModVersion)
     [System.IO.File]::WriteAllText($releasePs1Path, $releaseContent, [System.Text.UTF8Encoding]::new($true))
-    Write-Host "已填入 Release.ps1 模组信息" -ForegroundColor Green
+    Write-Host (Get-Str 'FilledRelease') -ForegroundColor Green
 }
+
+# ============================================================
+# 本地化 Release.ps1 和 StartGame.ps1
+# ============================================================
+
+Localize-ScriptFile -ScriptPath (Join-Path $projectPath "Release.ps1") -FileName "Release.ps1"
+Localize-ScriptFile -ScriptPath (Join-Path $projectPath "StartGame.ps1") -FileName "StartGame.ps1"
 
 # ============================================================
 # 处理 LICENSE 文件
@@ -328,41 +561,86 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 "@
     [System.IO.File]::WriteAllText($licensePath, $gpl3Content, [System.Text.UTF8Encoding]::new($true))
-    Write-Host "已使用 GPL v3 许可证: LICENSE.md" -ForegroundColor Green
+    Write-Host (Get-Str 'GPLUsed') -ForegroundColor Green
+} elseif ($LicenseType -eq "LGPL-3.0") {
+    $year = (Get-Date).Year
+    $lgpl3Content = @"
+                  GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) $year $AuthorName
+
+This version of the GNU Lesser Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU Lesser
+General Public License, and the "GNU GPL" refers to version 3 of the GNU
+General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface provided
+by the Library, but which is not otherwise based on the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library.
+
+  1. Exception to Section 3 of the GNU GPL.
+
+  You may convey a covered work under sections 3 and 4 of this License
+without being bound by section 3 of the GNU GPL.
+
+  2. Conveying Modified Versions.
+
+  If you modify a copy of the Library, you may convey a copy of the
+modified version under this License or under the GNU GPL.
+
+  3. Combined Works.
+
+  You may convey a Combined Work under terms of your choice.
+
+  4. Revised Versions of the GNU Lesser General Public License.
+
+  The Free Software Foundation may publish revised and/or new versions
+of the GNU Lesser General Public License from time to time.
+
+  Each version is given a distinguishing version number. If the
+Library as you received it specifies that a certain numbered version
+of the GNU Lesser General Public License "or any later version"
+applies to it, you have the option of following the terms and
+conditions either of that published version or of any later version
+published by the Free Software Foundation.
+
+  If the Library as you received it specifies that a proxy can decide
+whether future versions of the GNU Lesser General Public License shall
+apply, that proxy's public statement of acceptance of any version is
+permanent authorization for you to choose that version for the
+Library.
+"@
+    [System.IO.File]::WriteAllText($licensePath, $lgpl3Content, [System.Text.UTF8Encoding]::new($true))
+    Write-Host (Get-Str 'LGPLUsed') -ForegroundColor Green
 } else {
-    # MIT 许可证 (模板默认值，无需修改)
-    Write-Host "已使用 MIT 许可证: LICENSE.md" -ForegroundColor Green
+    Write-Host (Get-Str 'MITUsed') -ForegroundColor Green
 }
 
-Write-Host "  许可证类型: $LicenseType" -ForegroundColor Yellow
+Write-Host "  $(Get-Str 'LicenseTypeLabel'): $LicenseType" -ForegroundColor Yellow
 
 # ============================================================
 # 复制 Directory.Build.props.example 为 Directory.Build.props
 # ============================================================
-
-$projectPath = Resolve-Path $OutputDir
 
 $propsExamplePath = Join-Path $projectPath "Directory.Build.props.example"
 $propsPath = Join-Path $projectPath "Directory.Build.props"
 
 if (Test-Path $propsExamplePath) {
     Copy-Item $propsExamplePath $propsPath -Force
-    Write-Host "已创建: Directory.Build.props" -ForegroundColor Green
+    Write-Host (Get-Str 'PropsCreated') -ForegroundColor Green
 }
 
 # ============================================================
@@ -371,19 +649,19 @@ if (Test-Path $propsExamplePath) {
 
 $oldGitDir = Join-Path $projectPath ".git"
 if (Test-Path $oldGitDir) {
-    Write-Host "清理模板 Git 仓库..." -ForegroundColor Cyan
+    Write-Host (Get-Str 'CleaningGit') -ForegroundColor Cyan
     Remove-Item -Recurse -Force $oldGitDir
 }
 
-Write-Host "初始化新 Git 仓库..." -ForegroundColor Cyan
+Write-Host (Get-Str 'InitGit') -ForegroundColor Cyan
 Push-Location $projectPath
 try {
     git init | Out-Null
     git add . | Out-Null
     git commit -m "Initial commit: $ModDisplayName mod" | Out-Null
-    Write-Host "  Git 仓库已初始化并完成首次提交。" -ForegroundColor Green
+    Write-Host "  $(Get-Str 'GitInitDone')" -ForegroundColor Green
 } catch {
-    Write-Warning "Git 初始化失败: $_"
+    Write-Warning "$(Get-Str 'GitInitFail'): $_"
 }
 Pop-Location
 
@@ -391,7 +669,7 @@ Pop-Location
 # 生成 Rider 运行配置
 # ============================================================
 
-Write-Host "生成 Rider 运行配置..." -ForegroundColor Cyan
+Write-Host (Get-Str 'RiderConfig') -ForegroundColor Cyan
 
 $runDir = Join-Path $projectPath ".run"
 if (-not (Test-Path $runDir)) {
@@ -411,7 +689,7 @@ $runConfig = @"
 
 $runConfigPath = Join-Path $runDir "StartGame.run.xml"
 [System.IO.File]::WriteAllText($runConfigPath, $runConfig, [System.Text.UTF8Encoding]::new($true))
-Write-Host "  已创建: .run/StartGame.run.xml" -ForegroundColor Green
+Write-Host "  $(Get-Str 'RiderCreated')" -ForegroundColor Green
 
 # ============================================================
 # 完成
@@ -419,12 +697,12 @@ Write-Host "  已创建: .run/StartGame.run.xml" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  项目创建成功!" -ForegroundColor Green
+Write-Host "  $(Get-Str 'Success')" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "下一步:" -ForegroundColor Yellow
-Write-Host "  1. cd $OutputDir" -ForegroundColor White
-Write-Host "  2. 编辑 Directory.Build.props 填写游戏路径" -ForegroundColor White
-Write-Host "  3. dotnet build  (验证编译)" -ForegroundColor White
-Write-Host "  4. 右键 StartGame.ps1 运行测试" -ForegroundColor White
+Write-Host "$(Get-Str 'NextSteps'):" -ForegroundColor Yellow
+Write-Host "  $(Get-Str 'Step1')" -ForegroundColor White
+Write-Host "  $(Get-Str 'Step2')" -ForegroundColor White
+Write-Host "  $(Get-Str 'Step3')" -ForegroundColor White
+Write-Host "  $(Get-Str 'Step4')" -ForegroundColor White
 Write-Host ""
