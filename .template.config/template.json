@@ -63,7 +63,7 @@
       "type": "parameter",
       "description": "Language for generated project files (zh-CN or en-US)",
       "replaces": "__LANGUAGE__",
-      "defaultValue": "zh-CN"
+      "defaultValue": "en-US"
     }
   },
   "sources": [
@@ -71,35 +71,15 @@
       "modifiers": [
         {
           "condition": "('__LANGUAGE__' == 'zh-CN')",
-          "include": [
-            "README.md",
-            "CHANGELOG.md"
-          ]
+          "include": ["README_ZH.md", "CHANGELOG_ZH.md", "StartGame.ps1", "Release.ps1"]
         },
         {
           "condition": "('__LANGUAGE__' == 'en-US')",
-          "include": [
-            "README.en.md",
-            "CHANGELOG.en.md"
-          ],
+          "include": ["README.md", "CHANGELOG.md", "StartGame.ps1", "Release.ps1"],
           "rename": {
             "README.en.md": "README.md",
             "CHANGELOG.en.md": "CHANGELOG.md"
           }
-        },
-        {
-          "exclude": [
-            ".template.config/**",
-            ".git/**",
-            ".run/**",
-            "obj/**",
-            "bin/**",
-            "*.DotSettings",
-            "*.DotSettings.user",
-            "NewMod.ps1",
-            "README.en.md",
-            "CHANGELOG.en.md"
-          ]
         }
       ]
     }
