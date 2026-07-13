@@ -71,15 +71,29 @@
       "modifiers": [
         {
           "condition": "('__LANGUAGE__' == 'zh-CN')",
-          "include": ["README_ZH.md", "CHANGELOG_ZH.md", "StartGame.ps1", "Release.ps1"]
+          "include": ["README_ZH.md", "CHANGELOG_ZH.md"],
+          "rename": {
+            "README_ZH.md": "README.md",
+            "CHANGELOG_ZH.md": "CHANGELOG.md"
+          }
         },
         {
           "condition": "('__LANGUAGE__' == 'en-US')",
-          "include": ["README.md", "CHANGELOG.md", "StartGame.ps1", "Release.ps1"],
-          "rename": {
-            "README.en.md": "README.md",
-            "CHANGELOG.en.md": "CHANGELOG.md"
-          }
+          "include": ["README.md", "CHANGELOG.md"]
+        },
+        {
+          "exclude": [
+            ".template.config/**",
+            ".git/**",
+            ".run/**",
+            "obj/**",
+            "bin/**",
+            "*.DotSettings",
+            "*.DotSettings.user",
+            "NewMod.ps1",
+            "README_ZH.md",
+            "CHANGELOG_ZH.md"
+          ]
         }
       ]
     }

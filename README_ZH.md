@@ -1,7 +1,6 @@
 # Moss-Template
 
-一个用于开发 `Casualties Unknown` 模组的 [dotnet new](https://learn.microsoft.com/zh-cn/dotnet/core/tools/dotnet-new)
-模板。
+一个用于开发 `Casualties Unknown` 模组的 [dotnet new](https://learn.microsoft.com/zh-cn/dotnet/core/tools/dotnet-new) 模板。
 
 基于 [05126619z/ScavTemplate](https://github.com/05126619z/ScavTemplate)。
 
@@ -11,12 +10,13 @@
 
 ### 方式一：使用 `NewMod.ps1`（推荐）
 
-1. 克隆本仓库并注册模板：
+1. 下载本仓库：
+   - **方式 A**：点击 GitHub 右上角 `Code` → `Download ZIP`，解压到本地
+   - **方式 B**：克隆本仓库：
 
 ```powershell
 git clone https://github.com/CNCUMC/Moss-Template.git
 cd Moss-Template
-dotnet new install .
 ```
 
 2. 在任意目录运行创建脚本：
@@ -27,7 +27,7 @@ cd E:/Projects  # 你想创建项目的目录
 ```
 
 脚本会自动：
-
+- 自动安装模板（无需手动执行 `dotnet new install`）
 - 搜索 Steam 安装路径中的 Casualties Unknown 游戏目录
 - 交互式提示输入模组名称、GUID、版本等信息
 - 调用 `dotnet new mosstemplate` 生成项目
@@ -47,7 +47,7 @@ dotnet build
 ```powershell
 dotnet new mosstemplate -n MyCoolMod `
     --ModDisplayName "My Cool Mod" `
-    --ModGuid "com.example.mymod" `
+    --ModGuid "com.example.mycoolmod" `
     --ModVersion "1.0.0" `
     --AuthorName "Your Name" `
     --GameRootPath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" `
@@ -68,11 +68,11 @@ dotnet new mosstemplate -n MyCoolMod `
 |--------------------|--------------------------------|---------------------|
 | `-n` / `--name`    | 项目名称（PascalCase，如 `MyCoolMod`） | 必填                  |
 | `--ModDisplayName` | 模组显示名称（如 `My Cool Mod`）        | 从名称自动生成             |
-| `--ModGuid`        | 模组唯一标识（格式 `yourname.modname`）  | `com.example.mymod` |
+| `--ModGuid`        | 模组唯一标识（格式: `yourname.modname`）  | `com.example.mymod` |
 | `--ModVersion`     | 初始版本号                          | `1.0.0`             |
 | `--AuthorName`     | 作者名称（用于 LICENSE）               | `Your Name`         |
-| `--GameRootPath`   | 游戏根目录路径                        | Steam 默认路径          |
-| `--Language`       | 生成文件的语言 (`zh-CN` 或 `en-US`)    | `zh-CN`             |
+| `--GameRootPath`   | 游戏根目录路径                      | Steam 默认路径          |
+| `--Language`       | 生成文件的语言 (`zh-CN` 或 `en-US`) | `en-US`             |
 
 模板会自动替换以下内容：
 
@@ -81,6 +81,26 @@ dotnet new mosstemplate -n MyCoolMod `
 - `org.explosivehydra.mosstemplate` → `{ModGuid}`
 - `Moss Template` → `{ModDisplayName}`
 - 版本号、LICENSE 作者名、csproj 中的游戏 DLL 路径
+
+---
+
+## 多语言支持
+
+模板支持中英文双语，通过 `--Language` 参数控制：
+
+```powershell
+# 中文项目（脚本界面和生成文件均为中文）
+.\NewMod.ps1 -Language zh-CN
+
+# 英文项目（脚本界面和生成文件均为英文）
+.\NewMod.ps1 -Language en-US
+```
+
+**NewMod.ps1 界面语言**：标题、提示、配置摘要、完成信息。
+
+**生成文件语言**：
+- `README.md` / `CHANGELOG.md`：中文或英文版本
+- `StartGame.ps1` / `Release.ps1`：中文或英文界面
 
 ---
 
@@ -120,12 +140,27 @@ dotnet new mosstemplate -n MyCoolMod `
 [Release.ps1](Release.ps1) 用于构建、打包并发布模组到 NexusMods 和 GitHub Release。
 
 **基本用法：**
-
 ```powershell
 .\Release.ps1                          # 交互式确认版本号后发布
 .\Release.ps1 -SkipNexus               # 只发 GitHub
 .\Release.ps1 -SkipBuild -SkipGitHub   # 只发 NexusMods（跳过构建）
 ```
+
+**参数说明：**
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `-ModNamespace` | 模组命名空间（自动填入） | 必填 |
+| `-ModDisplayName` | 模组显示名称（自动填入） | 必填 |
+| `-ModVersion` | 版本号（自动填入，可交互修改） | 必填 |
+| `-NexusModId` | NexusMods 上的 Mod ID | `0`（需指定） |
+| `-NexusApiKey` | NexusMods API Key | `$env:NEXUS_API_KEY` |
+| `-Configuration` | 构建配置 | `Release` |
+| `-SkipBuild` | 跳过构建 | `$false` |
+| `-SkipNexus` | 跳过 NexusMods | `$false` |
+| `-SkipGitHub` | 跳过 GitHub | `$false` |
+| `-ReleaseNotes` | GitHub 发布说明 | 从 CHANGELOG.md 自动读取 |
+| `-Prerelease` | 标记为预发布 | `$false` |
 
 ### NexusMods API Key 设置
 
@@ -134,7 +169,6 @@ dotnet new mosstemplate -n MyCoolMod `
 3. 点击 `REQUEST API KEY` 获取 Key
 
 **使用方式：**
-
 ```powershell
 # 环境变量（推荐，一次设置永久有效）
 $env:NEXUS_API_KEY = "你的API Key"
@@ -154,17 +188,29 @@ winget install GitHub.cli
 gh auth login
 ```
 
+### 自动读取更新日志
+
+如果未指定 `-ReleaseNotes`，脚本会自动从 `CHANGELOG.md` 提取当前版本的内容：
+
+```markdown
+## v1.2.0
+- 新增 xxx 功能
+- 修复 yyy 问题
+```
+
+提取 `## v{版本号}` 到下一个 `## v` 之间的内容。
+
 ---
 
 ## csproj 引用说明
 
 模板包含 15 个核心游戏 DLL 引用。所有路径通过 `Directory.Build.props` 中的 MSBuild 属性管理：
 
-| 属性                | 说明               | 示例                                                         |
-|-------------------|------------------|------------------------------------------------------------|
-| `$(GameDir)`      | 游戏根目录            | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
-| `$(ManagedDir)`   | Managed 目录       | `$(GameDir)/CasualtiesUnknown_Data/Managed`                |
-| `$(CUCoreLibDll)` | CUCoreLib 路径（可选） | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll`                 |
+| 属性 | 说明 | 示例 |
+|------|------|------|
+| `$(GameDir)` | 游戏根目录 | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
+| `$(ManagedDir)` | Managed 目录 | `$(GameDir)/CasualtiesUnknown_Data/Managed` |
+| `$(CUCoreLibDll)` | CUCoreLib 路径（可选） | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll` |
 
 如需额外引用（如动画、音频、粒子等），在 csproj 中取消注释或添加新条目：
 
@@ -176,3 +222,52 @@ gh auth login
 ```
 
 > **注意：** 首次使用时复制 `Directory.Build.props.example` 为 `Directory.Build.props` 并填写你的游戏路径。
+
+---
+
+## 许可证选择
+
+创建项目时可选择许可证类型：
+
+| 选项 | 许可证 | 说明 |
+|------|--------|------|
+| 1 | MIT | 宽松，推荐大多数情况 |
+| 2 | GPL v3 | 要求衍生作品也开源 |
+| 3 | LGPL v3 | 允许闭源使用，修改需开源 |
+
+---
+
+## 项目结构
+
+```
+Moss-Template/
+├── .template.config/
+│   └── template.json          # 模板配置（参数定义、条件源）
+├── Directory.Build.props.example  # 游戏路径配置模板
+├── MossTemplate.csproj        # 项目文件
+├── Plugin.cs                  # BepInEx 插件入口
+├── StartGame.ps1              # 游戏启动脚本（英文）
+├── Release.ps1                # 模组发布脚本（英文）
+├── NewMod.ps1                 # 交互式模组创建脚本
+├── README.md                  # 中文文档
+├── README.en.md               # 英文文档
+├── CHANGELOG.md               # 中文更新日志模板
+├── CHANGELOG.en.md            # 英文更新日志模板
+└── LICENSE.md                 # 许可证文件
+```
+
+生成的项目结构：
+
+```
+MyCoolMod/
+├── Directory.Build.props      # 游戏路径配置（需编辑）
+├── MyCoolMod.csproj           # 项目文件
+├── Plugin.cs                  # 插件入口
+├── StartGame.ps1              # 游戏启动脚本
+├── Release.ps1                # 模组发布脚本
+├── README.md                  # 文档
+├── CHANGELOG.md               # 更新日志
+├── LICENSE.md                 # 许可证
+└── .run/
+    └── StartGame.run.xml      # Rider 运行配置
+```
