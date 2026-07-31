@@ -199,6 +199,7 @@ $ScriptI18n = @{
         "Collecting files and creating archive" = "收集文件并创建压缩包"
         "Added: $ModNamespace.dll" = "已添加: $ModNamespace.dll"
         "DLL not found:" = "未找到 DLL:"
+        'Added dependency: $($dep.Name)' = '已添加依赖: $($dep.Name)'
         "Added: $doc" = "已添加: $doc"
         "Read release notes from CHANGELOG.md" = "从 CHANGELOG.md 读取发布说明"
         "Generated NexusMods BBCode release notes" = "已生成 NexusMods BBCode 发布说明"

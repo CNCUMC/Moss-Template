@@ -116,6 +116,18 @@ if (-not [string]::IsNullOrWhiteSpace($userVersion)) {
 }
 Write-OK "Version:     $ModVersion"
 
+# Detect target framework from .csproj
+$csprojFile = Get-ChildItem $scriptDir -Filter "*.csproj" | Select-Object -First 1
+$tfm = "net472"
+if ($csprojFile) {
+    [xml]$csprojXml = Get-Content $csprojFile.FullName -Raw
+    $tfmNode = $csprojXml.Project.PropertyGroup.TargetFramework
+    if ($tfmNode) {
+        $tfm = $tfmNode
+    }
+}
+Write-OK "Target framework: $tfm"
+
 $releasesDir = Join-Path $scriptDir "Releases"
 if (-not (Test-Path $releasesDir)) {
     New-Item -ItemType Directory -Path $releasesDir -Force | Out-Null
@@ -154,7 +166,7 @@ $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "MossRelease_$([System.Gu
 $packageDir = Join-Path $tempDir "package"
 New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
 
-$buildOutputDir = Join-Path $scriptDir "bin/$Configuration/net472"
+$buildOutputDir = Join-Path $scriptDir "bin/$Configuration/$tfm"
 $dllSource = Join-Path $buildOutputDir "$ModNamespace.dll"
 
 if (Test-Path $dllSource) {
@@ -162,6 +174,16 @@ if (Test-Path $dllSource) {
     Write-OK "Added: $ModNamespace.dll"
 } else {
     Write-Warning "DLL not found: $dllSource"
+}
+
+# Collect dependency DLLs from project BepInEx/plugins/ directory
+$localPluginsDir = Join-Path $scriptDir "BepInEx/plugins"
+if (Test-Path $localPluginsDir) {
+    $depDlls = Get-ChildItem $localPluginsDir -File -Recurse -Filter "*.dll"
+    foreach ($dep in $depDlls) {
+        Copy-Item $dep.FullName $packageDir -Force
+        Write-OK "Added dependency: $($dep.Name)"
+    }
 }
 
 $docFiles = @("README.md", "README_ZH.md", "LICENSE.md", "CHANGELOG.md", "CHANGELOG_ZH.md")
@@ -324,30 +346,53 @@ if (-not $SkipGitHub) {
                 Write-Fail "gh not authenticated. Run: gh auth login"
             } else {
                 $tagName = "v$ModVersion"
+                $notesFile = $null
 
-                $ghArgs = @(
-                    "release", "create", $tagName,
-                    $zipPath,
-                    "--title", "$ModDisplayName $tagName"
-                )
+                try {
+                    $ghArgs = @(
+                        "release", "create", $tagName,
+                        $zipPath,
+                        "--title", "$ModDisplayName $tagName"
+                    )
 
-                if ($ReleaseNotes) {
-                    $ghArgs += @("--notes", $ReleaseNotes)
-                } else {
-                    $ghArgs += @("--generate-notes")
-                }
+                    if ($ReleaseNotes) {
+                        # Use --notes-file to avoid shell escaping and length issues
+                        $notesFile = [System.IO.Path]::GetTempFileName()
+                        $ReleaseNotes | Out-File -FilePath $notesFile -Encoding UTF8 -NoNewline
+                        $ghArgs += @("--notes-file", $notesFile)
+                    } else {
+                        $ghArgs += @("--generate-notes")
+                    }
 
-                if ($Prerelease) {
-                    $ghArgs += "--prerelease"
-                }
+                    if ($Prerelease) {
+                        $ghArgs += "--prerelease"
+                    }
 
-                Write-Host "    Running: gh $($ghArgs -join ' ')" -ForegroundColor DarkGray
-                & gh @ghArgs
+                    Write-Host "    Running: gh $($ghArgs -join ' ')" -ForegroundColor DarkGray
 
-                if ($LASTEXITCODE -eq 0) {
-                    Write-OK "GitHub Release created: $tagName"
-                } else {
-                    Write-Fail "GitHub Release creation failed (exit code: $LASTEXITCODE)"
+                    $ghOutput = & gh @ghArgs 2>&1
+                    $ghExitCode = $LASTEXITCODE
+
+                    if ($ghExitCode -eq 0) {
+                        Write-OK "GitHub Release created: $tagName"
+                    } else {
+                        Write-Host "    gh output:" -ForegroundColor Red
+                        Write-Host "    $ghOutput" -ForegroundColor Red
+                        Write-Fail "GitHub Release creation failed (exit code: $ghExitCode)"
+
+                        $ghOutputStr = "$ghOutput"
+                        if ($ghOutputStr -match "already exists") {
+                            Write-Host ""
+                            Write-Host "    [Hint] Tag/Release already exists. Manual fix:" -ForegroundColor Yellow
+                            Write-Host "      gh release delete $tagName --yes" -ForegroundColor DarkGray
+                            Write-Host "      git tag -d $tagName" -ForegroundColor DarkGray
+                            Write-Host "      git push origin :refs/tags/$tagName" -ForegroundColor DarkGray
+                        }
+                    }
+                } finally {
+                    if ($notesFile -and (Test-Path $notesFile)) {
+                        Remove-Item $notesFile -Force -ErrorAction SilentlyContinue
+                    }
                 }
             }
         } catch {
