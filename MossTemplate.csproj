@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <Product>MossTemplate</Product>
         <Version>1.0.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,8 +11,8 @@
             https://nuget.samboy.dev/v3/index.json
         </RestoreAdditionalProjectSources>
         <Platforms>AnyCPU;x64;x86</Platforms>
-        <PackageProjectUrl>https://github.com/yourname/MossTemplate</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/yourname/MossTemplate</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Your Name/MossTemplate</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Your Name/MossTemplate</RepositoryUrl>
         <PackageId>MossTemplate</PackageId>
     </PropertyGroup>
 

@@ -26,7 +26,7 @@
     "ModGuid": {
       "type": "parameter",
       "description": "The unique GUID for your mod (e.g. 'com.example.mymod')",
-      "replaces": "org.explosivehydra.mosstemplate",
+      "replaces": "org.cncumc.mosstemplate",
       "defaultValue": "com.example.mymod"
     },
     "ModVersion": {
@@ -38,7 +38,7 @@
     "AuthorName": {
       "type": "parameter",
       "description": "The author name for LICENSE and project metadata",
-      "replaces": "Black-Moss",
+      "replaces": "CNCUMC",
       "defaultValue": "Your Name"
     },
     "Description": {
@@ -51,7 +51,7 @@
       "type": "parameter",
       "description": "Path to the game root directory (e.g. 'E:/SteamLibrary/steamapps/common/Casualties Unknown Demo')",
       "replaces": "__GAME_ROOT_PATH__",
-      "defaultValue": "C:/Program Files (x86)/Steam/steamapps/common/Casualties Unknown Demo"
+      "defaultValue": "F:/SteamLibrary/steamapps/common/Casualties Unknown Demo"
     },
     "ModNamespace": {
       "type": "parameter",
