@@ -1,6 +1,7 @@
 # Moss-Template
 
-A [dotnet new](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new) template for developing `Casualties Unknown` mods.
+A [dotnet new](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new) template for developing
+`Casualties Unknown` mods.
 
 Based on [05126619z/ScavTemplate](https://github.com/05126619z/ScavTemplate).
 
@@ -11,8 +12,8 @@ Based on [05126619z/ScavTemplate](https://github.com/05126619z/ScavTemplate).
 ### Method 1: Using `NewMod.ps1` (Recommended)
 
 1. Download this repository:
-   - **Option A**: Click `Code` in the top-right corner of GitHub → `Download ZIP`, extract locally
-   - **Option B**: Clone this repository:
+    - **Option A**: Click `Code` in the top-right corner of GitHub → `Download ZIP`, extract locally
+    - **Option B**: Clone this repository:
 
 ```powershell
 git clone https://github.com/CNCUMC/Moss-Template.git
@@ -27,6 +28,7 @@ cd E:/Projects  # Directory where you want to create the project
 ```
 
 The script will automatically:
+
 - Auto-install the template (no need to manually run `dotnet new install`)
 - Search for Casualties Unknown game directory in Steam installation paths
 - Interactively prompt for mod name, GUID, version, etc.
@@ -64,17 +66,18 @@ dotnet new mosstemplate -n MyCoolMod `
 
 ## Template Parameters
 
-| Parameter | Description | Default Value |
-|-----------|-------------|---------------|
-| `-n` / `--name` | Project name (PascalCase, e.g. `MyCoolMod`) | Required |
-| `--ModDisplayName` | Mod display name (e.g. `My Cool Mod`) | Auto-generated from name |
-| `--ModGuid` | Unique mod GUID (format: `yourname.modname`) | `com.example.mymod` |
-| `--ModVersion` | Initial version number | `1.0.0` |
-| `--AuthorName` | Author name (for LICENSE) | `Your Name` |
-| `--GameRootPath` | Game root directory path | Steam default path |
-| `--Language` | Language for generated files (`zh-CN` or `en-US`) | `en-US` |
+| Parameter          | Description                                       | Default Value            |
+|--------------------|---------------------------------------------------|--------------------------|
+| `-n` / `--name`    | Project name (PascalCase, e.g. `MyCoolMod`)       | Required                 |
+| `--ModDisplayName` | Mod display name (e.g. `My Cool Mod`)             | Auto-generated from name |
+| `--ModGuid`        | Unique mod GUID (format: `yourname.modname`)      | `com.example.mymod`      |
+| `--ModVersion`     | Initial version number                            | `1.0.0`                  |
+| `--AuthorName`     | Author name (for LICENSE)                         | `Your Name`              |
+| `--GameRootPath`   | Game root directory path                          | Steam default path       |
+| `--Language`       | Language for generated files (`zh-CN` or `en-US`) | `en-US`                  |
 
 The template automatically replaces:
+
 - `MossTemplate.csproj` → `{ProjectName}.csproj`
 - `namespace MossTemplate` → `namespace {ProjectName}`
 - `org.explosivehydra.mosstemplate` → `{ModGuid}`
@@ -98,6 +101,7 @@ The template supports both Chinese and English, controlled via the `--Language` 
 **NewMod.ps1 interface language**: Title, prompts, config summary, completion messages.
 
 **Generated file language**:
+
 - `README.md` / `CHANGELOG.md`: Chinese or English version
 - `StartGame.ps1` / `Release.ps1`: Chinese or English interface
 
@@ -105,9 +109,11 @@ The template supports both Chinese and English, controlled via the `--Language` 
 
 ## About StartGame.ps1
 
-[StartGame.ps1](StartGame.ps1) copies the compiled DLL file to the BepInEx plugin directory in the game directory and automatically launches the game.
+[StartGame.ps1](StartGame.ps1) copies the compiled DLL file to the BepInEx plugin directory in the game directory and
+automatically launches the game.
 
 **Parameters:**
+
 - `$GamePath` — Game installation directory (e.g. `E:/SteamLibrary/steamapps/common/Casualties Unknown Demo`)
 - `$ModNamespace` — Mod namespace (e.g. `MyCoolMod`)
 
@@ -125,11 +131,13 @@ The template supports both Chinese and English, controlled via the `--Language` 
 4. Set `Command parameters` to: `-ExecutionPolicy Bypass`
 5. Click the plus next to `Before launch` → `Build Solution` → OK
 
-After that, each time you press the green triangle button next to the build button, the mod's DLL will be automatically copied to the BepInEx plugin directory and the game will start.
+After that, each time you press the green triangle button next to the build button, the mod's DLL will be automatically
+copied to the BepInEx plugin directory and the game will start.
 
 ### Visual Studio
 
-Right-click [StartGame.ps1](StartGame.ps1) and select `Run`, then manually fill in the parameters. Figure out the specific configuration yourself. :P
+Right-click [StartGame.ps1](StartGame.ps1) and select `Run`, then manually fill in the parameters. Figure out the
+specific configuration yourself. :P
 
 ---
 
@@ -147,19 +155,19 @@ Right-click [StartGame.ps1](StartGame.ps1) and select `Run`, then manually fill 
 
 **Parameters:**
 
-| Parameter | Description | Default Value |
-|-----------|-------------|---------------|
-| `-ModNamespace` | Mod namespace (auto-filled) | Required |
-| `-ModDisplayName` | Mod display name (auto-filled) | Required |
-| `-ModVersion` | Version number (auto-filled, interactive modification) | Required |
-| `-NexusModId` | Mod ID on NexusMods | `0` (must specify) |
-| `-NexusApiKey` | NexusMods API Key | `$env:NEXUS_API_KEY` |
-| `-Configuration` | Build configuration | `Release` |
-| `-SkipBuild` | Skip build step | `$false` |
-| `-SkipNexus` | Skip NexusMods upload | `$false` |
-| `-SkipGitHub` | Skip GitHub Release | `$false` |
-| `-ReleaseNotes` | GitHub Release notes | Auto-read from CHANGELOG.md |
-| `-Prerelease` | Mark as pre-release | `$false` |
+| Parameter         | Description                                            | Default Value               |
+|-------------------|--------------------------------------------------------|-----------------------------|
+| `-ModNamespace`   | Mod namespace (auto-filled)                            | Required                    |
+| `-ModDisplayName` | Mod display name (auto-filled)                         | Required                    |
+| `-ModVersion`     | Version number (auto-filled, interactive modification) | Required                    |
+| `-NexusModId`     | Mod ID on NexusMods                                    | `0` (must specify)          |
+| `-NexusApiKey`    | NexusMods API Key                                      | `$env:NEXUS_API_KEY`        |
+| `-Configuration`  | Build configuration                                    | `Release`                   |
+| `-SkipBuild`      | Skip build step                                        | `$false`                    |
+| `-SkipNexus`      | Skip NexusMods upload                                  | `$false`                    |
+| `-SkipGitHub`     | Skip GitHub Release                                    | `$false`                    |
+| `-ReleaseNotes`   | GitHub Release notes                                   | Auto-read from CHANGELOG.md |
+| `-Prerelease`     | Mark as pre-release                                    | `$false`                    |
 
 ### NexusMods API Key Setup
 
@@ -190,10 +198,12 @@ gh auth login
 
 ### Auto-Read Changelog
 
-If `-ReleaseNotes` is not specified, the script automatically extracts the current version's content from `CHANGELOG.md`:
+If `-ReleaseNotes` is not specified, the script automatically extracts the current version's content from
+`CHANGELOG.md`:
 
 ```markdown
 ## v1.2.0
+
 - Added xxx feature
 - Fixed yyy issue
 ```
@@ -204,13 +214,14 @@ Extracts content between `## v{version}` and the next `## v`.
 
 ## csproj Reference
 
-The template includes 15 core game DLL references. All paths are managed through MSBuild properties in `Directory.Build.props`:
+The template includes 15 core game DLL references. All paths are managed through MSBuild properties in
+`Directory.Build.props`:
 
-| Property | Description | Example |
-|----------|-------------|---------|
-| `$(GameDir)` | Game root directory | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
-| `$(ManagedDir)` | Managed directory | `$(GameDir)/CasualtiesUnknown_Data/Managed` |
-| `$(CUCoreLibDll)` | CUCoreLib path (optional) | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll` |
+| Property          | Description               | Example                                                    |
+|-------------------|---------------------------|------------------------------------------------------------|
+| `$(GameDir)`      | Game root directory       | `F:/SteamLibrary/steamapps/common/Casualties Unknown Demo` |
+| `$(ManagedDir)`   | Managed directory         | `$(GameDir)/CasualtiesUnknown_Data/Managed`                |
+| `$(CUCoreLibDll)` | CUCoreLib path (optional) | `$(GameDir)/BepInEx/plugins/CUCoreLib.dll`                 |
 
 To add additional references (e.g. animation, audio, particles), uncomment or add new entries in csproj:
 
@@ -229,11 +240,11 @@ To add additional references (e.g. animation, audio, particles), uncomment or ad
 
 Choose a license type when creating a project:
 
-| Option | License | Description |
-|--------|---------|-------------|
-| 1 | MIT | Permissive, recommended for most cases |
-| 2 | GPL v3 | Requires derivative works to be open source |
-| 3 | LGPL v3 | Allows closed-source use, modifications must be open |
+| Option | License | Description                                          |
+|--------|---------|------------------------------------------------------|
+| 1      | MIT     | Permissive, recommended for most cases               |
+| 2      | GPL v3  | Requires derivative works to be open source          |
+| 3      | LGPL v3 | Allows closed-source use, modifications must be open |
 
 ---
 
