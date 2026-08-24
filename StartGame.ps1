@@ -3,15 +3,20 @@
     [string]$ModNamespace = "__MOD_NAMESPACE__"
 )
 
-function Convert-ToDisplayName {
+function Convert-ToDisplayName
+{
     param([string]$Namespace)
-    if ([string]::IsNullOrWhiteSpace($Namespace)) { return $Namespace }
+    if ( [string]::IsNullOrWhiteSpace($Namespace))
+    {
+        return $Namespace
+    }
 
     $result = [System.Text.StringBuilder]::new()
     $chars = $Namespace.ToCharArray()
     for ($i = 0; $i -lt $chars.Length; $i++) {
         $c = $chars[$i]
-        if ($i -gt 0 -and [char]::IsUpper($c) -and [char]::IsLower($chars[$i-1])) {
+        if ($i -gt 0 -and [char]::IsUpper($c) -and [char]::IsLower($chars[$i - 1]))
+        {
             $result.Append(' ') | Out-Null
         }
         $result.Append($c) | Out-Null
@@ -157,10 +162,26 @@ try
             for ($i = $lastReadPosition; $i -lt $content.Count; $i++) {
                 $line = $content[$i]
                 $color = "White"
-                if ($line -match "^\[Error") { $color = "Red" }
-                elseif ($line -match "^\[Warning") { $color = "Yellow" }
-                elseif ($line -match "^\[Info") { $color = "White" }
-                elseif ($line -match "^\[Message") { $color = "Blue" }
+                if ($line -match "^\[Error")
+                {
+                    $color = "Red"
+                }
+                elseif ($line -match "^\[Warning")
+                {
+                    $color = "Yellow"
+                }
+                elseif ($line -match "^\[Info")
+                {
+                    $color = "White"
+                }
+                elseif ($line -match "^\[Message")
+                {
+                    $color = "Blue"
+                }
+                elseif ($line -match "^\[Debug")
+                {
+                    $color = "Magenta"
+                }
                 Write-ColoredMessage $line $color
             }
             $lastReadPosition = $content.Count
