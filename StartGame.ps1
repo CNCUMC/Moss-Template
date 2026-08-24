@@ -38,7 +38,7 @@ $bepInExPath = [System.IO.Path]::Combine($GamePath, "BepInEx")
 
 $GameLog = Join-Path $env:USERPROFILE "AppData\LocalLow\Orsoniks\CasualtiesUnknown\Player.log"
 $GameExecutable = [System.IO.Path]::Combine($GamePath, "CasualtiesUnknown.exe")
-$ModDll = [System.IO.Path]::Combine($PSScriptRoot, "bin/Debug/net472", "$ModNamespace.dll")
+$ModDll = [System.IO.Path]::Combine($PSScriptRoot, "bin/Debug/net48", "$ModNamespace.dll")
 
 $targetModFolder = $ModName
 
