@@ -1,30 +1,8 @@
 ﻿param(
     [string]$GamePath = "__GAME_ROOT_PATH__",
-    [string]$ModNamespace = "__MOD_NAMESPACE__"
+    [string]$ModName = "__MOD_NAME__",
+    [string]$ModNameSpace = "__MOD_NAMESPACE__"
 )
-
-function Convert-ToDisplayName
-{
-    param([string]$Namespace)
-    if ( [string]::IsNullOrWhiteSpace($Namespace))
-    {
-        return $Namespace
-    }
-
-    $result = [System.Text.StringBuilder]::new()
-    $chars = $Namespace.ToCharArray()
-    for ($i = 0; $i -lt $chars.Length; $i++) {
-        $c = $chars[$i]
-        if ($i -gt 0 -and [char]::IsUpper($c) -and [char]::IsLower($chars[$i - 1]))
-        {
-            $result.Append(' ') | Out-Null
-        }
-        $result.Append($c) | Out-Null
-    }
-    return $result.ToString()
-}
-
-$ModName = Convert-ToDisplayName -Namespace $ModNamespace
 
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
@@ -38,7 +16,7 @@ $bepInExPath = [System.IO.Path]::Combine($GamePath, "BepInEx")
 
 $GameLog = Join-Path $env:USERPROFILE "AppData\LocalLow\Orsoniks\CasualtiesUnknown\Player.log"
 $GameExecutable = [System.IO.Path]::Combine($GamePath, "CasualtiesUnknown.exe")
-$ModDll = [System.IO.Path]::Combine($PSScriptRoot, "bin/Debug/net48", "$ModNamespace.dll")
+$ModDll = [System.IO.Path]::Combine($PSScriptRoot, "bin/Debug/net48", "$ModNameSpace.dll")
 
 $targetModFolder = $ModName
 
@@ -95,16 +73,16 @@ if (Test-Path $GameLog)
 }
 
 Write-ColoredMessage "Game path: $GamePath" Yellow
-Write-ColoredMessage "Mod namespace: $ModNamespace" Yellow
 Write-ColoredMessage "Mod name: $ModName" Yellow
+Write-ColoredMessage "Namespace: $ModNameSpace" Yellow
 Write-ColoredMessage "Target folder: $targetModFolder" Yellow
 
 try
 {
     $pluginPath = [System.IO.Path]::Combine($bepInExPath, "plugins", $targetModFolder)
     New-Item -ItemType Directory -Path $pluginPath -Force
-    Copy-Item $ModDll ([System.IO.Path]::Combine($pluginPath, "$ModNamespace.dll")) -Force
-    Write-ColoredMessage "Copying mod DLL to ""$pluginPath\$ModNamespace.dll""." Cyan
+    Copy-Item $ModDll ([System.IO.Path]::Combine($pluginPath, "$ModNameSpace.dll")) -Force
+    Write-ColoredMessage "Copying mod DLL to ""$pluginPath\$ModNameSpace.dll""." Cyan
 }
 catch
 {

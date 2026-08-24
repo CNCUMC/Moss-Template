@@ -48,7 +48,8 @@ dotnet build
 
 ```powershell
 dotnet new mosstemplate -n MyCoolMod `
-    --ModDisplayName "My Cool Mod" `
+    --ModName "My Cool Mod" `
+    --ModNameSpace "MyCoolMod" `
     --ModGuid "com.example.mycoolmod" `
     --ModVersion "1.0.0" `
     --AuthorName "Your Name" `
@@ -68,8 +69,9 @@ dotnet new mosstemplate -n MyCoolMod `
 
 | 参数               | 说明                                     | 默认值              |
 |--------------------|------------------------------------------|---------------------|
-| `-n` / `--name`    | 项目名称（PascalCase，如 `MyCoolMod`）   | 必填                |
-| `--ModDisplayName` | 模组显示名称（如 `My Cool Mod`）         | 从名称自动生成      |
+| `-n` / `--name`    | 项目名称/命名空间（如 `MyCoolMod`）      | 必填                |
+| `--ModName`        | 模组名称（如 `My Cool Mod`）             | `My Mod`            |
+| `--ModNameSpace`   | 模组命名空间（PascalCase，如 `MyCoolMod`）| `MyMod`            |
 | `--ModGuid`        | 模组唯一标识（格式: `yourname.modname`） | `com.example.mymod` |
 | `--ModVersion`     | 初始版本号                               | `1.0.0`             |
 | `--AuthorName`     | 作者名称（用于 LICENSE）                 | `Your Name`         |
@@ -81,7 +83,7 @@ dotnet new mosstemplate -n MyCoolMod `
 - `MossTemplate.csproj` → `{项目名}.csproj`
 - `namespace MossTemplate` → `namespace {项目名}`
 - `org.explosivehydra.mosstemplate` → `{ModGuid}`
-- `Moss Template` → `{ModDisplayName}`
+- `Moss Template` → `{ModName}`
 - 版本号、LICENSE 作者名、csproj 中的游戏 DLL 路径
 
 ---
@@ -114,19 +116,20 @@ dotnet new mosstemplate -n MyCoolMod `
 **参数：**
 
 - `$GamePath` — 游戏安装目录（如 `E:/SteamLibrary/steamapps/common/Casualties Unknown Demo`）
-- `$ModNamespace` — 模组命名空间（如 `MyCoolMod`）
+- `$ModName` — 模组名称（如 `My Cool Mod`）
+- `$ModNameSpace` — 模组命名空间（如 `MyCoolMod`）
 
 **命令行运行：**
 
 ```powershell
-.\StartGame.ps1 -GamePath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" -ModNamespace "MyCoolMod"
+.\StartGame.ps1 -GamePath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" -ModName "My Cool Mod" -ModNameSpace "MyCoolMod"
 ```
 
 ### JetBrains Rider 配置
 
 1. 右键 [StartGame.ps1](StartGame.ps1) → `运行 'StartGame.ps1'`
 2. 点击编辑器右上角构建按钮旁的 `StartGame.ps1` 按钮 → `编辑配置...`
-3. 填写 `Script arguments:`：`"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "MyCoolMod"`
+3. 填写 `Script arguments:`：`"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "My Cool Mod" "MyCoolMod"`
 4. 设置 `Command parameters`：`-ExecutionPolicy Bypass`
 5. 点击 `执行前` 旁的加号 → `构建解决方案` → 确定
 
@@ -154,8 +157,8 @@ dotnet new mosstemplate -n MyCoolMod `
 
 | 参数              | 说明                           | 默认值                   |
 |-------------------|--------------------------------|--------------------------|
-| `-ModNamespace`   | 模组命名空间（自动填入）       | 必填                     |
-| `-ModDisplayName` | 模组显示名称（自动填入）       | 必填                     |
+| `-ModName`        | 模组名称（自动填入）           | 必填                     |
+| `-ModNameSpace`   | 模组命名空间（自动填入）       | 必填                     |
 | `-ModVersion`     | 版本号（自动填入，可交互修改） | 必填                     |
 | `-NexusModId`     | NexusMods 上的 Mod ID          | `0`（需指定）            |
 | `-NexusApiKey`    | NexusMods API Key              | `$env:NEXUS_API_KEY`     |

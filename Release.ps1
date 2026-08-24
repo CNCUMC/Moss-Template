@@ -44,8 +44,8 @@
     GitHub Release requires gh CLI: winget install GitHub.cli
 #>
 param(
-    [string]$ModNamespace = "__MOD_NAMESPACE__",
-    [string]$ModDisplayName = "__MOD_DISPLAY_NAME__",
+    [string]$ModName = "__MOD_NAME__",
+    [string]$ModNameSpace = "__MOD_NAMESPACE__",
     [string]$ModVersion = "__MOD_VERSION__",
     [int]$NexusModId = 0,
     [string]$Configuration = "Release",
@@ -107,8 +107,8 @@ function Convert-MarkdownToNexusBBCode {
 # ============================================================
 
 Write-Step "Mod Info:" "Yellow"
-Write-OK "Namespace:   $ModNamespace"
-Write-OK "Display Name: $ModDisplayName"
+Write-OK "Mod Name:    $ModName"
+Write-OK "Namespace:   $ModNameSpace"
 
 $userVersion = Read-Host "Enter version (default: $ModVersion)"
 if (-not [string]::IsNullOrWhiteSpace($userVersion)) {
@@ -133,7 +133,7 @@ if (-not (Test-Path $releasesDir)) {
     New-Item -ItemType Directory -Path $releasesDir -Force | Out-Null
 }
 
-$zipName = "$ModDisplayName-v$ModVersion.zip"
+$zipName = "$ModName-v$ModVersion.zip"
 $zipPath = Join-Path $releasesDir $zipName
 
 # ============================================================
@@ -167,11 +167,11 @@ $packageDir = Join-Path $tempDir "package"
 New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
 
 $buildOutputDir = Join-Path $scriptDir "bin/$Configuration/$tfm"
-$dllSource = Join-Path $buildOutputDir "$ModNamespace.dll"
+$dllSource = Join-Path $buildOutputDir "$ModNameSpace.dll"
 
 if (Test-Path $dllSource) {
     Copy-Item $dllSource $packageDir -Force
-    Write-OK "Added: $ModNamespace.dll"
+    Write-OK "Added: $ModNameSpace.dll"
 } else {
     Write-Warning "DLL not found: $dllSource"
 }
@@ -216,7 +216,7 @@ if ([string]::IsNullOrWhiteSpace($ReleaseNotes)) {
 }
 
 if ($GamePath -and (Test-Path $GamePath)) {
-    $deployedDir = Join-Path $GamePath "BepInEx/plugins/$ModDisplayName"
+    $deployedDir = Join-Path $GamePath "BepInEx/plugins/$ModName"
     if (Test-Path $deployedDir) {
         $extraFiles = Get-ChildItem $deployedDir -File | Where-Object { $_.Extension -ne ".dll" }
         foreach ($f in $extraFiles) {
@@ -300,7 +300,7 @@ if (-not $SkipNexus) {
             $createFileBody = @{
                 upload_id     = $uploadId
                 mod_id        = $NexusModId
-                name          = "$ModDisplayName v$ModVersion"
+                name          = "$ModName v$ModVersion"
                 version       = $ModVersion
                 file_category = 1
             }
@@ -352,7 +352,7 @@ if (-not $SkipGitHub) {
                     $ghArgs = @(
                         "release", "create", $tagName,
                         $zipPath,
-                        "--title", "$ModDisplayName $tagName"
+                        "--title", "$ModName $tagName"
                     )
 
                     if ($ReleaseNotes) {

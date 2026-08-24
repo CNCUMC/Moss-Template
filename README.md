@@ -48,7 +48,8 @@ After registering the template (see step 1 above), use the command line directly
 
 ```powershell
 dotnet new mosstemplate -n MyCoolMod `
-    --ModDisplayName "My Cool Mod" `
+    --ModName "My Cool Mod" `
+    --ModNameSpace "MyCoolMod" `
     --ModGuid "com.example.mycoolmod" `
     --ModVersion "1.0.0" `
     --AuthorName "Your Name" `
@@ -68,8 +69,9 @@ dotnet new mosstemplate -n MyCoolMod `
 
 | Parameter          | Description                                       | Default Value            |
 |--------------------|---------------------------------------------------|--------------------------|
-| `-n` / `--name`    | Project name (PascalCase, e.g. `MyCoolMod`)       | Required                 |
-| `--ModDisplayName` | Mod display name (e.g. `My Cool Mod`)             | Auto-generated from name |
+| `-n` / `--name`    | Project name / namespace (e.g. `MyCoolMod`)       | Required                 |
+| `--ModName`        | Mod name / display name (e.g. `My Cool Mod`)     | `My Mod`                 |
+| `--ModNameSpace`   | Mod namespace (PascalCase, e.g. `MyCoolMod`)     | `MyMod`                  |
 | `--ModGuid`        | Unique mod GUID (format: `yourname.modname`)      | `com.example.mymod`      |
 | `--ModVersion`     | Initial version number                            | `1.0.0`                  |
 | `--AuthorName`     | Author name (for LICENSE)                         | `Your Name`              |
@@ -81,7 +83,7 @@ The template automatically replaces:
 - `MossTemplate.csproj` → `{ProjectName}.csproj`
 - `namespace MossTemplate` → `namespace {ProjectName}`
 - `org.explosivehydra.mosstemplate` → `{ModGuid}`
-- `Moss Template` → `{ModDisplayName}`
+- `Moss Template` → `{ModName}`
 - Version number, LICENSE author name, game DLL paths in csproj
 
 ---
@@ -115,19 +117,20 @@ automatically launches the game.
 **Parameters:**
 
 - `$GamePath` — Game installation directory (e.g. `E:/SteamLibrary/steamapps/common/Casualties Unknown Demo`)
-- `$ModNamespace` — Mod namespace (e.g. `MyCoolMod`)
+- `$ModName` — Mod name / display name (e.g. `My Cool Mod`)
+- `$ModNameSpace` — Mod namespace (e.g. `MyCoolMod`)
 
 **Command line usage:**
 
 ```powershell
-.\StartGame.ps1 -GamePath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" -ModNamespace "MyCoolMod"
+.\StartGame.ps1 -GamePath "E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" -ModName "My Cool Mod" -ModNameSpace "MyCoolMod"
 ```
 
 ### JetBrains Rider Configuration
 
 1. Right-click [StartGame.ps1](StartGame.ps1) → `Run 'StartGame.ps1'`
 2. Click the `StartGame.ps1` button next to the build button in the top-right corner → `Edit Configurations...`
-3. Fill in `Script arguments:` with: `"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "MyCoolMod"`
+3. Fill in `Script arguments:` with: `"E:/SteamLibrary/steamapps/common/Casualties Unknown Demo" "My Cool Mod" "MyCoolMod"`
 4. Set `Command parameters` to: `-ExecutionPolicy Bypass`
 5. Click the plus next to `Before launch` → `Build Solution` → OK
 
@@ -157,8 +160,8 @@ specific configuration yourself. :P
 
 | Parameter         | Description                                            | Default Value               |
 |-------------------|--------------------------------------------------------|-----------------------------|
-| `-ModNamespace`   | Mod namespace (auto-filled)                            | Required                    |
-| `-ModDisplayName` | Mod display name (auto-filled)                         | Required                    |
+| `-ModName`        | Mod name / display name (auto-filled)                  | Required                    |
+| `-ModNameSpace`   | Mod namespace (auto-filled)                            | Required                    |
 | `-ModVersion`     | Version number (auto-filled, interactive modification) | Required                    |
 | `-NexusModId`     | Mod ID on NexusMods                                    | `0` (must specify)          |
 | `-NexusApiKey`    | NexusMods API Key                                      | `$env:NEXUS_API_KEY`        |

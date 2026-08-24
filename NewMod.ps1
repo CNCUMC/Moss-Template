@@ -8,12 +8,11 @@
     运行前会自动从当前目录安装模板，无需手动执行 dotnet new install。
 
 .PARAMETER ModName
-    模组的 PascalCase 命名空间名称（如 "MyCoolMod"），将作为项目名和命名空间。
-    不能包含空格。
+    模组名称 / 显示名称（如 "My Cool Mod"），用于 BepInEx 插件注册等。
 
-.PARAMETER ModDisplayName
-    模组的显示名称（如 "My Cool Mod"），用于 BepInEx 插件注册。
-    如果不指定，将自动从 ModName 按大驼峰拆分生成。
+.PARAMETER ModNameSpace
+    模组的 PascalCase 命名空间名称（如 "MyCoolMod"），将作为项目名和命名空间。
+    不能包含空格。如果不指定，将自动从 ModName 去除空格生成。
 
 .PARAMETER ModGuid
     模组的唯一 GUID，格式为 "yourname.modname"（如 "com.example.mymod"）。
@@ -31,10 +30,10 @@
     脚本界面语言 ("zh-CN" 或 "en-US")。
 
 .PARAMETER OutputDir
-    项目输出目录。如果不指定，则使用当前目录下与 ModName 同名的子目录。
+    项目输出目录。如果不指定，则使用当前目录下与 ModNameSpace 同名的子目录。
 
 .EXAMPLE
-    .\NewMod.ps1 -ModName "MyCoolMod" -ModGuid "com.example.mymod"
+    .\NewMod.ps1 -ModName "My Cool Mod" -ModNameSpace "MyCoolMod" -ModGuid "com.example.mymod"
 
 .EXAMPLE
     .\NewMod.ps1 -Language zh-CN
@@ -45,7 +44,7 @@
 #>
 param(
     [string]$ModName,
-    [string]$ModDisplayName,
+    [string]$ModNameSpace,
     [string]$ModGuid,
     [string]$ModVersion,
     [string]$AuthorName,
@@ -63,9 +62,10 @@ $UIStrings = @{
     'zh-CN' = @{
         Title = "Casualties Unknown Mod Creator"
         Subtitle = "Moss-Template 模组创建向导"
-        NamespacePrompt = "输入模组命名空间 (PascalCase, 不能有空格, 如 MyCoolMod)"
-        NamespaceError = "命名空间不能包含空格"
-        DisplayNamePrompt = "输入模组显示名称"
+        ModNamePrompt = "输入模组名称 (如 My Cool Mod)"
+        ModNameError = "模组名称不能为空"
+        ModNameSpacePrompt = "输入命名空间 (PascalCase, 不能有空格, 如 MyCoolMod)"
+        ModNameSpaceError = "命名空间不能包含空格"
         GuidPrompt = "输入模组 GUID (格式: yourname.modname)"
         VersionPrompt = "输入模组版本号"
         AuthorPrompt = "输入作者名称 (用于 LICENSE)"
@@ -83,8 +83,8 @@ $UIStrings = @{
         NeedManualFix = "项目将被创建，但你需要手动修改 Directory.Build.props 中的游戏路径。"
         OutputDirPrompt = "输入项目输出目录"
         ConfigSummary = "配置摘要"
-        SummaryNamespace = "命名空间/项目名"
-        SummaryDisplay = "显示名称"
+        SummaryModName = "模组名称"
+        SummaryNameSpace = "命名空间"
         SummaryGUID = "GUID"
         SummaryVersion = "版本号"
         SummaryAuthor = "作者"
@@ -123,9 +123,10 @@ $UIStrings = @{
     'en-US' = @{
         Title = "Casualties Unknown Mod Creator"
         Subtitle = "Moss-Template Mod Creation Wizard"
-        NamespacePrompt = "Enter mod namespace (PascalCase, no spaces, e.g. MyCoolMod)"
-        NamespaceError = "Namespace cannot contain spaces"
-        DisplayNamePrompt = "Enter mod display name"
+        ModNamePrompt = "Enter mod name (e.g. My Cool Mod)"
+        ModNameError = "Mod name cannot be empty"
+        ModNameSpacePrompt = "Enter namespace (PascalCase, no spaces, e.g. MyCoolMod)"
+        ModNameSpaceError = "Namespace cannot contain spaces"
         GuidPrompt = "Enter mod GUID (format: yourname.modname)"
         VersionPrompt = "Enter mod version"
         AuthorPrompt = "Enter author name (for LICENSE)"
@@ -143,8 +144,8 @@ $UIStrings = @{
         NeedManualFix = "Project will be created, but you need to manually fix the game path in Directory.Build.props."
         OutputDirPrompt = "Enter project output directory"
         ConfigSummary = "Configuration Summary"
-        SummaryNamespace = "Namespace/Project"
-        SummaryDisplay = "Display Name"
+        SummaryModName = "Mod Name"
+        SummaryNameSpace = "Namespace"
         SummaryGUID = "GUID"
         SummaryVersion = "Version"
         SummaryAuthor = "Author"
@@ -189,15 +190,15 @@ $UIStrings = @{
 $ScriptI18n = @{
     "Release.ps1" = @{
         "Mod Info:" = "模组信息:"
+        "Mod Name:" = "模组名称:"
         "Namespace:" = "命名空间:"
-        "Display Name:" = "显示名称:"
         "Version:" = "版本号:"
         "Enter version (default:" = "输入版本号 (默认:"
         "Building project" = "构建项目"
         "Build failed" = "构建失败"
         "Build succeeded" = "构建成功"
         "Collecting files and creating archive" = "收集文件并创建压缩包"
-        "Added: $ModNamespace.dll" = "已添加: $ModNamespace.dll"
+        "Added: $ModName.dll" = "已添加: $ModName.dll"
         "DLL not found:" = "未找到 DLL:"
         'Added dependency: $($dep.Name)' = '已添加依赖: $($dep.Name)'
         "Added: $doc" = "已添加: $doc"
@@ -238,8 +239,8 @@ $ScriptI18n = @{
         "Failed to copy BepInEx logs:" = "复制 BepInEx 日志失败:"
         "Cleared previous game logs." = "已清空之前的日志文件。"
         "Game path: $GamePath" = "游戏路径: $GamePath"
-        "Mod namespace: $ModNamespace" = "模组命名空间: $ModNamespace"
         "Mod name: $ModName" = "模组名称: $ModName"
+        "Namespace: $ModNameSpace" = "命名空间: $ModNameSpace"
         "Target folder: $targetModFolder" = "目标文件夹: $targetModFolder"
         "Copying mod DLL to" = "正在复制模组 DLL 到"
         "Failed to copy mod DLL:" = "复制模组 DLL 失败:"
@@ -465,24 +466,30 @@ Write-Host ""
 
 if ( [string]::IsNullOrWhiteSpace($ModName))
 {
-    $ModName = Read-Input -Prompt (Get-Str 'NamespacePrompt') -Required
+    $ModName = Read-Input -Prompt (Get-Str 'ModNamePrompt') -Required
 }
 
-if ($ModName -match '\s')
+if ([string]::IsNullOrWhiteSpace($ModName))
 {
-    Write-Error "$( Get-Str 'NamespaceError' ): '$ModName'"
+    Write-Error "$( Get-Str 'ModNameError' )"
     exit 1
 }
 
-if ( [string]::IsNullOrWhiteSpace($ModDisplayName))
+if ( [string]::IsNullOrWhiteSpace($ModNameSpace))
 {
-    $autoDisplayName = Convert-ToDisplayName -Name $ModName
-    $ModDisplayName = Read-Input -Prompt (Get-Str 'DisplayNamePrompt') -DefaultValue $autoDisplayName
+    $autoNamespace = $ModName -replace '\s+', ''
+    $ModNameSpace = Read-Input -Prompt (Get-Str 'ModNameSpacePrompt') -DefaultValue $autoNamespace -Required
+}
+
+if ($ModNameSpace -match '\s')
+{
+    Write-Error "$( Get-Str 'ModNameSpaceError' ): '$ModNameSpace'"
+    exit 1
 }
 
 if ( [string]::IsNullOrWhiteSpace($ModGuid))
 {
-    $defaultGuid = "com.example.$($ModName.ToLower() )"
+    $defaultGuid = "com.example.$($ModNameSpace.ToLower() )"
     $ModGuid = Read-Input -Prompt (Get-Str 'GuidPrompt') -DefaultValue $defaultGuid -Required
 }
 
@@ -546,7 +553,7 @@ if (-not (Test-Path $GameRootPath -PathType Container))
 
 if ( [string]::IsNullOrWhiteSpace($OutputDir))
 {
-    $OutputDir = Read-Input -Prompt (Get-Str 'OutputDirPrompt') -DefaultValue $ModName
+    $OutputDir = Read-Input -Prompt (Get-Str 'OutputDirPrompt') -DefaultValue $ModNameSpace
 }
 
 # ============================================================
@@ -556,8 +563,8 @@ if ( [string]::IsNullOrWhiteSpace($OutputDir))
 Write-Host ""
 Write-Host "----------------------------------------" -ForegroundColor Yellow
 Write-Host "$( Get-Str 'ConfigSummary' ):" -ForegroundColor Yellow
-Write-Host "  $( Get-Str 'SummaryNamespace' ): $ModName" -ForegroundColor White
-Write-Host "  $( Get-Str 'SummaryDisplay' ): $ModDisplayName" -ForegroundColor White
+Write-Host "  $( Get-Str 'SummaryModName' ): $ModName" -ForegroundColor White
+Write-Host "  $( Get-Str 'SummaryNameSpace' ): $ModNameSpace" -ForegroundColor White
 Write-Host "  $( Get-Str 'SummaryGUID' ): $ModGuid" -ForegroundColor White
 Write-Host "  $( Get-Str 'SummaryVersion' ): $ModVersion" -ForegroundColor White
 Write-Host "  $( Get-Str 'SummaryAuthor' ): $AuthorName" -ForegroundColor White
@@ -582,13 +589,13 @@ Write-Host (Get-Str 'CreatingProject') -ForegroundColor Cyan
 
 $dotnetArgs = @(
     "new", "mosstemplate",
-    "-n", $ModName,
-    "--ModDisplayName", $ModDisplayName,
+    "-n", $ModNameSpace,
+    "--ModName", $ModName,
+    "--ModNameSpace", $ModNameSpace,
     "--ModGuid", $ModGuid,
     "--ModVersion", $ModVersion,
     "--AuthorName", $AuthorName,
     "--GameRootPath", $GameRootPath,
-    "--ModNamespace", $ModName,
     "--Language", $Language,
     "-o", $OutputDir
 )
@@ -617,11 +624,20 @@ $releasePs1Path = Join-Path $projectPath "Release.ps1"
 if (Test-Path $releasePs1Path)
 {
     $releaseContent = [System.IO.File]::ReadAllText($releasePs1Path, [System.Text.Encoding]::UTF8)
-    $releaseContent = $releaseContent.Replace("__MOD_NAMESPACE__", $ModName)
-    $releaseContent = $releaseContent.Replace("__MOD_DISPLAY_NAME__", $ModDisplayName)
+    $releaseContent = $releaseContent.Replace("__MOD_NAMESPACE__", $ModNameSpace)
+    $releaseContent = $releaseContent.Replace("__MOD_NAME__", $ModName)
     $releaseContent = $releaseContent.Replace("__MOD_VERSION__", $ModVersion)
     [System.IO.File]::WriteAllText($releasePs1Path, $releaseContent,[System.Text.UTF8Encoding]::new($true))
     Write-Host (Get-Str 'FilledRelease') -ForegroundColor Green
+}
+
+$startGamePs1Path = Join-Path $projectPath "StartGame.ps1"
+if (Test-Path $startGamePs1Path)
+{
+    $startGameContent = [System.IO.File]::ReadAllText($startGamePs1Path, [System.Text.Encoding]::UTF8)
+    $startGameContent = $startGameContent.Replace("__MOD_NAMESPACE__", $ModNameSpace)
+    $startGameContent = $startGameContent.Replace("__MOD_NAME__", $ModName)
+    [System.IO.File]::WriteAllText($startGamePs1Path, $startGameContent,[System.Text.UTF8Encoding]::new($true))
 }
 
 # ============================================================
@@ -874,7 +890,7 @@ try
 {
     git init | Out-Null
     git add . | Out-Null
-    git commit -m "Initial commit: $ModDisplayName mod" | Out-Null
+    git commit -m "Initial commit: $ModName mod" | Out-Null
     Write-Host "  $( Get-Str 'GitInitDone' )" -ForegroundColor Green
 }
 catch

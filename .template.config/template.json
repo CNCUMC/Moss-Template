@@ -17,11 +17,17 @@
     "type": "project"
   },
   "symbols": {
-    "ModDisplayName": {
+    "ModName": {
       "type": "parameter",
-      "description": "The display name of your mod (e.g. 'My Cool Mod')",
+      "description": "The mod name / display name (e.g. 'My Cool Mod')",
       "replaces": "Moss Template",
       "defaultValue": "My Mod"
+    },
+    "ModNameSpace": {
+      "type": "parameter",
+      "description": "The mod namespace / project name (e.g. 'MyCoolMod')",
+      "replaces": "__MOD_NAMESPACE__",
+      "defaultValue": "MyMod"
     },
     "ModGuid": {
       "type": "parameter",
@@ -52,12 +58,6 @@
       "description": "Path to the game root directory (e.g. 'E:/SteamLibrary/steamapps/common/Casualties Unknown Demo')",
       "replaces": "__GAME_ROOT_PATH__",
       "defaultValue": "F:/SteamLibrary/steamapps/common/Casualties Unknown Demo"
-    },
-    "ModNamespace": {
-      "type": "parameter",
-      "description": "Mod namespace for StartGame.ps1 default parameter (same as project name)",
-      "replaces": "__MOD_NAMESPACE__",
-      "defaultValue": "MyMod"
     },
     "Language": {
       "type": "parameter",
