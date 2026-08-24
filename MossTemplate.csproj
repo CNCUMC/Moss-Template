@@ -11,8 +11,8 @@
             https://nuget.samboy.dev/v3/index.json
         </RestoreAdditionalProjectSources>
         <Platforms>AnyCPU;x64;x86</Platforms>
-        <PackageProjectUrl>https://github.com/Your Name/MossTemplate</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Your Name/MossTemplate</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/CNCUMC/MossTemplate</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/CNCUMC/MossTemplate</RepositoryUrl>
         <PackageId>MossTemplate</PackageId>
     </PropertyGroup>
 
