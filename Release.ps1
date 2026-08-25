@@ -118,7 +118,6 @@ Write-OK "Version:     $ModVersion"
 
 # Detect target framework from .csproj
 $csprojFile = Get-ChildItem $scriptDir -Filter "*.csproj" | Select-Object -First 1
-$tfm = "net472"
 if ($csprojFile) {
     [xml]$csprojXml = Get-Content $csprojFile.FullName -Raw
     $tfmNode = $csprojXml.Project.PropertyGroup.TargetFramework
@@ -166,7 +165,7 @@ $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "MossRelease_$([System.Gu
 $packageDir = Join-Path $tempDir "package"
 New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
 
-$buildOutputDir = Join-Path $scriptDir "bin/$Configuration/$tfm"
+$buildOutputDir = Join-Path $scriptDir "bin/$Configuration/48"
 $dllSource = Join-Path $buildOutputDir "$ModNameSpace.dll"
 
 if (Test-Path $dllSource) {
